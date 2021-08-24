@@ -1,0 +1,13 @@
+name: BetterGiniCalc
+title: BetterGiniCalc
+username:
+account: blakocha
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4531106
+bundleId: 4959738
+url: https://blakocha.shinyapps.io/BetterGiniCalc/
+when: 1629838017.42116
+lastSyncTime: 1629838017.42116
+asMultiple: FALSE
+asStatic: FALSE
