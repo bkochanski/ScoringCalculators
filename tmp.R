@@ -86,3 +86,25 @@ my_gini(df$default_flag, res2[3]*df$s1+res2[4]*df$s2)
 res3[1]
 my_gini(df$default_flag, res3[3]*df$s1+res3[4]*df$s2)
 
+cor(df)
+my_gini(df$default_flag, df$s1)
+my_gini(df$default_flag, df$s2)
+cor(df$default_flag, df$s1)
+cor(df$default_flag, df$s2)
+cor(df$default_flag, df$s1, method="spearman")
+cor(df$default_flag, df$s2, method="spearman")
+
+mean(df$s1>0)
+cor(df$s2, df$s1>0)
+cor(df$s2, df$s1>0, method="spearman")
+my_gini(df$s1>0, df$s2)
+
+mean(df$s1>1)
+cor(df$s2, df$s1>1)
+cor(df$s2, df$s1>1, method="spearman")
+
+mean(df$s1>2)
+cor(df$s2, df$s1>2)
+mean(df$s1>3)
+cor(df$s2, df$s1>3)
+
