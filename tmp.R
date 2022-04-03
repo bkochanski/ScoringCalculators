@@ -108,3 +108,11 @@ cor(df$s2, df$s1>2)
 mean(df$s1>3)
 cor(df$s2, df$s1>3)
 
+
+#correlations
+cors<-c((-5:9)/10,.99)
+ginic4<-function(x){gini_combine_calculator(.6,.6,x,.1)[1]}
+ginic4<-Vectorize(ginic4)
+ginis<-ginic4(cors)
+plot(cors, ginis)
+#gini_combine_calculator(.4,.4,-.5,.1)
