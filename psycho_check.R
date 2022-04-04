@@ -14,6 +14,7 @@ rho_from_pbs<-function(pbs=0.5, defrate=.1){
 pbs_from_rho(.5,.2)
 rho_from_pbs(pbs_from_rho(.5,.2), .2)
 
+# Sample 1
 # drate<-.231
 # rho_1<-rho_from_pbs(-.35,drate)
 # rho_2<-rho_from_pbs(-.36,drate)
@@ -88,3 +89,44 @@ results[1]/2+.5
 
 #sample3
 gini_crd(rho_from_pbs(-.35,.291), .291)
+
+
+#Sample 1
+drate<-.231
+rho_1<-rho_from_pbs(-.35,drate)
+rho_2<-rho_from_pbs(-.36,drate)
+rho_s<-.37
+(gini1<-gini_crd(rho=rho_1, drate))
+(gini2<-gini_crd(rho=rho_2, drate))
+gini1/2+.5
+gini2/2+.5
+(results<-gini_combine_calculator(gini1, gini2, rho_s, drate))
+results[1]/2+.5
+
+(w1<-results[3]/12.8)
+(w2<-results[4]/110.2)
+(w1/w2)
+
+(-.061/-.005)
+
+#Sample 2
+drate<-.0415
+rho_1<-rho_from_pbs(-.13,drate)
+rho_2<-rho_from_pbs(-.12,drate)
+rho_s<-.09
+(gini1<-gini_crd(rho=rho_1, drate))
+(gini2<-gini_crd(rho=rho_2, drate))
+gini1/2+.5
+gini2/2+.5
+(results<-gini_combine_calculator(gini1, gini2, rho_s, drate))
+results[1]/2+.5
+
+(w1<-results[3]/12.12)
+(w2<-results[4]/73.69)
+(w1/w2)
+
+(-.05/-.01)
+
+#sample3
+gini_crd(rho_from_pbs(-.35,.291), .291)
+gini_crd(rho_from_pbs(-.35,.291), .291)/2+.5
