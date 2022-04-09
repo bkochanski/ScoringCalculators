@@ -31,3 +31,56 @@ gini_combine_calculator<-function(g1, g2, corr, defaultrate){
 
 gini_combine_calculator(.6, .6, .7, .1)
 gini_combine_calculator(.6, .4, .1, .1)
+
+#saul new
+# Sample	N	Region	AUC_Bureau	AUC_Psych	AUC_Combined	Bad_Rate	r_Bureau_Psych	rho_Bureau_Psych
+# 1	4166	S. America	0,678	0,664	0,729	4,25%	0,099	0,092
+# 2	721	S. America	0,694	0,727	0,784	4,85%	0,104	0,088
+# 3	1306	Europe	0,642	0,627	0,688	16,77%	0,142	0,135
+# 4	3236	S. America	0,715	0,642	0,741	17,27%	0,135	0,129
+
+gini_from_auc<-function(x){(x-.5)*2}
+
+#which is which
+
+# 1	4166	S. America	0,678	0,664	0,729	4,25%	0,099	0,092
+
+#case 1
+(gini1<-gini_from_auc(.678))
+(gini2<-gini_from_auc(.664))
+(gini3<-gini_from_auc(.729))
+(res<-gini_combine_calculator(gini1, gini2, 0.099, .0425))
+res[1]/2+.5
+(res<-gini_combine_calculator(gini1, gini2, 0.092, .0425))
+res[1]/2+.5
+
+# 2	721	S. America	0,694	0,727	0,784	4,85%	0,104	0,088
+
+#case 3
+(gini1<-gini_from_auc(.694))
+(gini2<-gini_from_auc(.727))
+(res<-gini_combine_calculator(gini1, gini2, 0.104, .0485))
+res[1]/2+.5
+(res<-gini_combine_calculator(gini1, gini2, 0.088, .0485))
+res[1]/2+.5
+
+# 3	1306	Europe	0,642	0,627	0,688	16,77%	0,142	0,135
+
+#case 3
+(gini1<-gini_from_auc(.642))
+(gini2<-gini_from_auc(.627))
+(res<-gini_combine_calculator(gini1, gini2, 0.142, .1677))
+res[1]/2+.5
+(res<-gini_combine_calculator(gini1, gini2, 0.135, .1677))
+res[1]/2+.5
+
+# 4	3236	S. America	0,715	0,642	0,741	17,27%	0,135	0,129
+
+(gini1<-gini_from_auc(.715))
+(gini2<-gini_from_auc(.642))
+(res<-gini_combine_calculator(gini1, gini2, 0.135, .1727))
+res[1]/2+.5
+(res<-gini_combine_calculator(gini1, gini2, 0.129, .1727))
+res[1]/2+.5
+
+
