@@ -56,8 +56,28 @@ data$Gini_Predict_rho<-gini_predict(data$Gini_Bureau, data$Gini_Psych, data$rho_
 data$AUC_predict_r<-auc_from_gini(data$Gini_Predict_r)
 data$AUC_predict_rho<-auc_from_gini(data$Gini_Predict_rho)
 
+AUC_lwr<-function(auc, brate, n){presize::prec_auc(auc, brate, n)$lwr}
+AUC_lwr<-Vectorize(AUC_lwr)
+AUC_upr<-function(auc, brate, n){presize::prec_auc(auc, brate, n)$upr}
+AUC_upr<-Vectorize(AUC_upr)
+
+data$AUC_predict_r_lwr<-AUC_lwr(data$AUC_predict_r, data$Bad_Rate, data$N)
+data$AUC_predict_r_upr<-AUC_upr(data$AUC_predict_r, data$Bad_Rate, data$N)
+
+data$Gini_predict_r_lwr<-gini_from_auc(data$AUC_predict_r_lwr)
+data$Gini_predict_r_upr<-gini_from_auc(data$AUC_predict_r_upr)
+
+#presize::prec_auc(auc_from_gini(.376), .1677, 1306)$lwr
+
+#data$AUC_predict_rlwr<-auc_from_gini(data$Gini_Predict_r)
+
+
+gini_from_auc(presize::prec_auc(auc_from_gini(.376), .1677, 1306)$lwr)
+gini_from_auc(presize::prec_auc(auc_from_gini(.376), .1677, 1306)$upr)
+
+
 library(ggplot2)
-ggplot(data, aes(y=paste0(Sample, ': ', Region, '(N=', N, ')'))) +
+ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Rate*100, '%'))) +
   geom_point(aes(x=Gini_Bureau), col='dark green') +
   geom_text(aes(x=Gini_Bureau, label=paste('Bureau:', Gini_Bureau)), hjust=0.5, vjust=-1) +
   geom_point(aes(x=Gini_Psych), col='green')+
@@ -65,10 +85,13 @@ ggplot(data, aes(y=paste0(Sample, ': ', Region, '(N=', N, ')'))) +
   geom_point(aes(x=Gini_Combined), col='black')+
   geom_text(aes(x=Gini_Combined, label=paste('Combined:', Gini_Combined)), hjust=0.5, vjust=-1) +
   geom_point(aes(x=Gini_Predict_r), col='blue')+
+  geom_errorbar(aes(xmin = Gini_predict_r_lwr, xmax = Gini_predict_r_upr), col='blue', width=.1)+
   geom_text(aes(x=Gini_Predict_r, label=paste('Predicted (r):', round(Gini_Predict_r,3))), hjust=1, vjust=1.5, col='blue') +
-  geom_point(aes(x=Gini_Predict_rho), col='dark blue')+
-  geom_text(aes(x=Gini_Predict_rho, label=paste('Predicted (rho):', round(Gini_Predict_rho,3))), hjust=0, vjust=1.5, col='dark blue') +
+#  geom_point(aes(x=Gini_Predict_rho), col='dark blue')+
+#  geom_text(aes(x=Gini_Predict_rho, label=paste('Predicted (rho):', round(Gini_Predict_rho,3))), hjust=0, vjust=1.5, col='dark blue') +
   scale_y_discrete(limits=rev)+
-  xlab('')+ylab('')+xlim(c(0.2, .6))
+  xlab('')+ylab('')+xlim(c(0.2, .75))
+
+
 
 

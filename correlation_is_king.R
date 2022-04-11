@@ -29,6 +29,24 @@ gini_combine_calculator<-function(g1, g2, corr, defaultrate){
            rho1=rho_s1, rho2=rho_s2, new_corr=corr_opt))
 }
 
+gini_combine_calculator(.6, .4, .1, .04)
+
+# generate the simulated data (... many ways..., assume multivariate distribution)
+# build the logistic regression on the two scorecards and compare with the calculator
+
+
+cors<-c((-2:9)/10,.99)
+ginic4<-function(x){gini_combine_calculator(.6,.6,x,.1)[1]}
+ginic4<-Vectorize(ginic4)
+ginis<-ginic4(cors)
+plot(cors, ginis)
+library(ggplot2)
+ggplot(data.frame(cors, ginis), aes(x=cors, y=ginis)) + 
+  geom_point() +
+  geom_text(label=paste0('r=', round(cors,2), ' Gini=', round(ginis,3)), hjust=0.4, vjust=1) +
+  xlab("Correlation") + ylab("Gini") + ggtitle("Combined Gini of two scorecards with Gini=0.6 depending on the correlation between them")
+
+
 (target1<-unname(gini_combine_calculator(.6, .6, .7, .1)[1]))
 ginis1<-c(.6)
 corrs1<-c(.7)
@@ -40,8 +58,14 @@ ginis1[length(ginis1)+1]<-uniroot(search1,lower=ginis1[length(ginis1)]-.1,upper=
 }
 
 df<-data.frame(corrs1, ginis1)
+library(ggplot2)
+ggplot(df, aes(x=corrs1, y=ginis1)) + geom_point() +
+  geom_text(label=paste0('r=', round(corrs1,2), ' Gini2=', round(ginis1,3)), hjust=0.4, vjust=1)+
+  xlab("Correlation") + ylab("Gini") + ggtitle("Gini/correlation trade-off: all these combinations have the same effect (Combined Gini=.648) when combining with a scorecard of Gini1=.6") +
+  theme_bw()
+
 #View(df)
-plot(df)
+#plot(df)
 
 #saul new
 # Sample	N	Region	AUC_Bureau	AUC_Psych	AUC_Combined	Bad_Rate	r_Bureau_Psych	rho_Bureau_Psych
