@@ -77,16 +77,16 @@ gini_from_auc(presize::prec_auc(auc_from_gini(.376), .1677, 1306)$upr)
 
 
 library(ggplot2)
-ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Rate*100, '%'))) +
+ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Rate*100, '%\ncorr=', r_Bureau_Psych))) +
   geom_point(aes(x=Gini_Bureau), col='dark green') +
-  geom_text(aes(x=Gini_Bureau, label=paste('Bureau:', Gini_Bureau)), hjust=0.5, vjust=-1) +
+  geom_text(aes(x=Gini_Bureau, label=paste('Bureau:', Gini_Bureau)), hjust=0.5, vjust=1.5) +
   geom_point(aes(x=Gini_Psych), col='green')+
   geom_text(aes(x=Gini_Psych, label=paste('Psych:', Gini_Psych)), hjust=0.5, vjust=-1) +
   geom_point(aes(x=Gini_Combined), col='black')+
   geom_text(aes(x=Gini_Combined, label=paste('Combined:', Gini_Combined)), hjust=0.5, vjust=-1) +
   geom_point(aes(x=Gini_Predict_r), col='blue')+
   geom_errorbar(aes(xmin = Gini_predict_r_lwr, xmax = Gini_predict_r_upr), col='blue', width=.1)+
-  geom_text(aes(x=Gini_Predict_r, label=paste('Predicted (r):', round(Gini_Predict_r,3))), hjust=1, vjust=1.5, col='blue') +
+  geom_text(aes(x=Gini_Predict_r, label=paste('Predicted (r):', round(Gini_Predict_r,3))), hjust=0, vjust=1.5, col='blue') +
 #  geom_point(aes(x=Gini_Predict_rho), col='dark blue')+
 #  geom_text(aes(x=Gini_Predict_rho, label=paste('Predicted (rho):', round(Gini_Predict_rho,3))), hjust=0, vjust=1.5, col='dark blue') +
   scale_y_discrete(limits=rev)+

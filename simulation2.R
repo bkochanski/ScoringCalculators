@@ -1,5 +1,12 @@
 library(MASS)
 
+my_gini<-function(resp, pred){
+  c<-pred[order(pred)]
+  d<-resp[order(pred)]
+  bc<-c(0, cumsum(d)/sum(d))
+  gc<-c(0, cumsum(1-d)/sum(1-d))
+  sum((gc[2:(length(gc))]-gc[1:(length(gc)-1)])*(bc[2:(length(bc))]+bc[1:(length(bc)-1)]))-1} 
+
 ginic<-function(bc, gc){
   #function for gini when we have cumulative goods and bads vectors
   sum((gc[2:(length(gc))]-gc[1:(length(gc)-1)])*
@@ -59,27 +66,27 @@ sigma <- matrix(c(1, corrs, r_from_gini(gini1, dfrate),
 
 tot_results<-list()
 
-for (i in 1:100){
+rest<-gini_combine_calculator(gini1, gini2, corrs, dfrate)
+
+for (i in 1:300){
 z <- mvrnorm(n,mu=rep(0, m),Sigma=sigma)
 df<-z
 df[,3]<-(z[,3]<qnorm(dfrate))*1
 df<-data.frame(df)
 names(df)<-c('s1', 's2', 'default_flag')
 
-rest<-gini_combine_calculator(gini1, gini2, corrs, dfrate)
-
-my_gini(df$default_flag, df$s1)
-my_gini(df$default_flag, df$s2)
-cor(df$s1, df$s2)
-mean(df$default_flag)
+#my_gini(df$default_flag, df$s1)
+#my_gini(df$default_flag, df$s2)
+#cor(df$s1, df$s2)
+#mean(df$default_flag)
 res1<-gini_combine_calculator(my_gini(df$default_flag, df$s1), my_gini(df$default_flag, df$s2), cor(df$s2, df$s1), mean(df$default_flag))
 
 gini_a_opt<-my_gini(df$default_flag, res1['a_opt']*df$s1+df$s2)
 
-(mylogit <- glm(I(1-default_flag) ~ s1 + s2, data = df, family = "binomial"))
-(myprobit <- glm(I(1-default_flag) ~ s1 + s2, data = df, family = binomial(link="probit")))
-(logit1_a<-mylogit$coefficients[2]/mylogit$coefficients[3])
-(probit1_a<-myprobit$coefficients[2]/myprobit$coefficients[3])
+mylogit <- glm(I(1-default_flag) ~ s1 + s2, data = df, family = "binomial")
+myprobit <- glm(I(1-default_flag) ~ s1 + s2, data = df, family = binomial(link="probit"))
+logit1_a<-mylogit$coefficients[2]/mylogit$coefficients[3]
+probit1_a<-myprobit$coefficients[2]/myprobit$coefficients[3]
 
 #my_gini(mylogit$y, -mylogit$fitted.values)
 gini_logit1<-my_gini(df$default_flag, logit1_a*df$s1+df$s2)
@@ -120,4 +127,23 @@ df_tot_results<-data.frame(matrix(unlist(bind_tot_results), ncol=length(tot_resu
 names(df_tot_results)<-names(tot_results[[1]])
 
 hist(df_tot_results$new_gini)
+rest['new_gini']
+mean(df_tot_results$new_gini)
 sd(df_tot_results$new_gini)
+
+unname(rest['new_gini']/rest['gini2'])
+mean(df_tot_results$new_gini/df_tot_results$gini2)
+sd(df_tot_results$new_gini/df_tot_results$gini2)
+
+unname(rest['new_gini']-rest['gini2'])
+hist(df_tot_results$new_gini-df_tot_results$gini2, breaks=30)
+mean(df_tot_results$new_gini-df_tot_results$gini2)
+sd(df_tot_results$new_gini-df_tot_results$gini2)
+
+hist(df_tot_results$new_gini-df_tot_results$gini_logit1, breaks=30)
+mean(df_tot_results$new_gini-df_tot_results$gini_logit1)
+sd(df_tot_results$new_gini-df_tot_results$gini_logit1)
+
+
+#library(dplyr)
+#df_tot_results %>% mutate(ginincrease=new_gini-gini2)%>%select(gini2, new_gini, ginincrease)%>%View()
