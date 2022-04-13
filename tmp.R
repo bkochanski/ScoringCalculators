@@ -116,3 +116,4 @@ ginic4<-Vectorize(ginic4)
 ginis<-ginic4(cors)
 plot(cors, ginis)
 #gini_combine_calculator(.4,.4,-.5,.1)
+

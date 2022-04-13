@@ -22,7 +22,7 @@ gini_crd<-function(rho=0.5, defrate=0.1, gran=10000) {
 
 r_from_gini<-function(gini, defaultrate=.1){
   phi_s1<-function(x){gini_crd(rho=x, defrate=defaultrate, gran=100000)-gini}
-  rho_s1<-uniroot(phi_s1,lower=0,upper=1,tol = .Machine$double.eps)$root
+  uniroot(phi_s1,lower=0,upper=1,tol = .Machine$double.eps)$root
 }
 
 gini_combine_calculator<-function(g1, g2, corr, defaultrate){
