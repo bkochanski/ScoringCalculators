@@ -41,28 +41,30 @@ ginic<-function(bc, gc){
   sum((gc[2:(length(gc))]-gc[1:(length(gc)-1)])*
         (bc[2:(length(bc))]+bc[1:(length(bc)-1)]))-1
 } 
-gini_crd<-function(rho=0.5, defrate=0.1, gran=10000) {
-  #function translating rho into gini for a given defrate
-  drates_i<-pnorm(qnorm(defrate), rho*(qnorm(1:(gran-1)/gran)),sqrt(1-rho^2))
-  drates_2i<-(c(1, drates_i)+c(drates_i, 0))/2
-  return(ginic(cumsum((drates_2i)/sum(drates_2i)), cumsum((1-drates_2i)/sum(1-drates_2i))))
+gini_from_r<-function(rho=.5, defrate=.1){
+  F1<-function(s, d, rho){integrate(function(x){pnorm((qnorm(d)-rho*x)/sqrt(1-rho^2))*dnorm(x)}, lower=-Inf, upper=s)$value}
+  F2<-function(s,d,rho){pnorm((-qnorm(d)+rho*s)/sqrt(1-rho^2))*dnorm(s)}
+  F1_<-Vectorize(function(x){F1(x, defrate, rho)})
+  F2_<-Vectorize(function(x){F2(x, defrate, rho)})
+  2*integrate(function(x){F1_(x)*F2_(x)}, 
+              lower=-Inf, upper=Inf)$value/defrate/(1-defrate)-1
 }
 
-gini1<-gini_crd(rho=rho_1, drate)
-gini2<-gini_crd(rho=rho_2, drate)
+gini1<-gini_from_r(rho=rho_1, drate)
+gini2<-gini_from_r(rho=rho_2, drate)
 
 
 gini_combine_calculator<-function(g1, g2, corr, defaultrate){
   #rho_s1
-  phi_s1<-function(x){gini_crd(rho=x, defrate=defaultrate, gran=100000)-g1}
+  phi_s1<-function(x){gini_from_r(rho=x, defrate=defaultrate)-g1}
   rho_s1<-uniroot(phi_s1,lower=0,upper=1,tol = .Machine$double.eps)$root
   #rho_s2
-  phi_s2<-function(x){gini_crd(rho=x, defrate=defaultrate, gran=100000)-g2}
+  phi_s2<-function(x){gini_from_r(rho=x, defrate=defaultrate)-g2}
   rho_s2<-uniroot(phi_s2,lower=0,upper=1,tol = .Machine$double.eps)$root
   
   (a_opt<-(corr*rho_s2-rho_s1)/(corr*rho_s1-rho_s2))
   corr_opt<-(a_opt*rho_s1+rho_s2)/sqrt(a_opt^2+2*a_opt*corr+1)
-  g_result0<-gini_crd(corr_opt, defaultrate, gran=100000)
+  g_result0<-gini_from_r(corr_opt, defaultrate)
   g_result1<-if(a_opt<0 | a_opt>1000) {NaN} else {g_result0}
   return(c(new_gini=g_result1, 
            #new_gini_2=g_result0, 
@@ -88,7 +90,7 @@ gini2/2+.5
 results[1]/2+.5
 
 #sample3
-gini_crd(rho_from_pbs(-.35,.291), .291)
+gini_from_r(rho_from_pbs(-.35,.291), .291)
 
 
 #Sample 1
@@ -96,8 +98,8 @@ drate<-.231
 rho_1<-rho_from_pbs(-.35,drate)
 rho_2<-rho_from_pbs(-.36,drate)
 rho_s<-.37
-(gini1<-gini_crd(rho=rho_1, drate))
-(gini2<-gini_crd(rho=rho_2, drate))
+(gini1<-gini_from_r(rho=rho_1, drate))
+(gini2<-gini_from_r(rho=rho_2, drate))
 gini1/2+.5
 gini2/2+.5
 (results<-gini_combine_calculator(gini1, gini2, rho_s, drate))
@@ -114,8 +116,8 @@ drate<-.0415
 rho_1<-rho_from_pbs(-.13,drate)
 rho_2<-rho_from_pbs(-.12,drate)
 rho_s<-.09
-(gini1<-gini_crd(rho=rho_1, drate))
-(gini2<-gini_crd(rho=rho_2, drate))
+(gini1<-gini_from_r(rho=rho_1, drate))
+(gini2<-gini_from_r(rho=rho_2, drate))
 gini1/2+.5
 gini2/2+.5
 (results<-gini_combine_calculator(gini1, gini2, rho_s, drate))
@@ -128,5 +130,5 @@ results[1]/2+.5
 (-.05/-.01)
 
 #sample3
-gini_crd(rho_from_pbs(-.35,.291), .291)
-gini_crd(rho_from_pbs(-.35,.291), .291)/2+.5
+gini_from_r(rho_from_pbs(-.35,.291), .291)
+gini_from_r(rho_from_pbs(-.35,.291), .291)/2+.5
