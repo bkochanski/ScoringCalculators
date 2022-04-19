@@ -10,7 +10,7 @@ gini_from_r<-function(rho=.5, defrate=.1){
   F1_<-Vectorize(function(x){F1(x, defrate, rho)})
   F2_<-Vectorize(function(x){F2(x, defrate, rho)})
   2*integrate(function(x){F1_(x)*F2_(x)}, 
-              lower=-Inf, upper=Inf)$value/defrate/(1-defrate)-1
+              lower=-Inf, upper=Inf, subdivisions=500, rel.tol = .Machine$double.eps^.24)$value/defrate/(1-defrate)-1
 }
 
 gini_combine_calculator<-function(g1, g2, corr, defaultrate){
@@ -86,9 +86,9 @@ ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Ra
   geom_text(aes(x=Gini_Psych, label=paste('Psych:', Gini_Psych)), hjust=0.5, vjust=-1) +
   geom_point(aes(x=Gini_Combined), col='black')+
   geom_text(aes(x=Gini_Combined, label=paste('Combined:', Gini_Combined)), hjust=0.5, vjust=-1) +
-  geom_point(aes(x=Gini_Predict_r), col='blue')+
-  geom_errorbar(aes(xmin = Gini_predict_r_lwr, xmax = Gini_predict_r_upr), col='blue', width=.1)+
-  geom_text(aes(x=Gini_Predict_r, label=paste('Predicted (r):', round(Gini_Predict_r,3))), hjust=0, vjust=1.5, col='blue') +
+  geom_point(aes(y=5:1-.1, x=Gini_Predict_r), col='blue')+
+  geom_errorbar(aes(y=5:1-.1, xmin = Gini_predict_r_lwr, xmax = Gini_predict_r_upr), col='blue', width=.1)+
+  geom_text(aes(y=5:1-.1, x=Gini_Predict_r, label=paste('Predicted (r):', round(Gini_Predict_r,3))), hjust=0, vjust=1.5, col='blue') +
 #  geom_point(aes(x=Gini_Predict_rho), col='dark blue')+
 #  geom_text(aes(x=Gini_Predict_rho, label=paste('Predicted (rho):', round(Gini_Predict_rho,3))), hjust=0, vjust=1.5, col='dark blue') +
   scale_y_discrete(limits=rev)+

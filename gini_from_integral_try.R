@@ -128,7 +128,7 @@ gini_from_r<-function(rho=.5, defrate=.1){
   F1_<-Vectorize(function(x){F1(x, defrate, rho)})
   F2_<-Vectorize(function(x){F2(x, defrate, rho)})
   2*integrate(function(x){F1_(x)*F2_(x)}, 
-              lower=-Inf, upper=Inf, subdivisions=500, rel.tol = .Machine$double.eps^.25)$value/defrate/(1-defrate)-1
+              lower=-Inf, upper=Inf, subdivisions=500, rel.tol = .Machine$double.eps^.24)$value/defrate/(1-defrate)-1
 }
 
 gini_crd_test<-function(rho=0.5, defrate=0.1, gran=10000) {
