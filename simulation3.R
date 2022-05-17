@@ -44,21 +44,21 @@ gini_from_r<-function(rho=.5, defrate=.1){
 
 r_from_gini<-function(gini, defaultrate=.1){
   phi_s1<-function(x){gini_from_r(rho=x, defrate=defaultrate)-gini}
-  uniroot(phi_s1,lower=0,upper=1,tol = .Machine$double.eps)$root
+  uniroot(phi_s1,lower=0,upper=.9999,tol = .Machine$double.eps)$root
 }
 
 gini_combine_calculator<-function(g1, g2, corr, defaultrate){
   #rho_s1
   phi_s1<-function(x){gini_from_r(rho=x, defrate=defaultrate)-g1}
-  rho_s1<-uniroot(phi_s1,lower=0,upper=1,tol = .Machine$double.eps)$root
+  rho_s1<-uniroot(phi_s1,lower=0,upper=.9999,tol = .Machine$double.eps)$root
   #rho_s2
   phi_s2<-function(x){gini_from_r(rho=x, defrate=defaultrate)-g2}
-  rho_s2<-uniroot(phi_s2,lower=0,upper=1,tol = .Machine$double.eps)$root
+  rho_s2<-uniroot(phi_s2,lower=0,upper=.9999,tol = .Machine$double.eps)$root
   
   (a_opt<-(corr*rho_s2-rho_s1)/(corr*rho_s1-rho_s2))
   corr_opt<-(a_opt*rho_s1+rho_s2)/sqrt(a_opt^2+2*a_opt*corr+1)
-  g_result0<-gini_from_r(corr_opt, defaultrate)
-  g_result1<-if(a_opt<0 | a_opt>1000) {NaN} else {g_result0}
+  g_result0<-if(corr_opt>1) {NaN} else {gini_from_r(corr_opt, defaultrate)}
+  g_result1<-if(a_opt<0 | a_opt>1000 | corr_opt>1) {NaN} else {g_result0}
   return(c(new_gini=g_result1, 
            a_opt=a_opt, score_1_weight=a_opt/(1+a_opt), score_2_weight=1/(1+a_opt), 
            rho1=rho_s1, rho2=rho_s2, new_corr=corr_opt, gini1=g1, gini2=g2, corr=corr, defrate=defaultrate))
@@ -71,7 +71,7 @@ gini_combine_1<-Vectorize(gini_combine_1)
 
 
 number_of_sim<-300
-sample_size<-100000
+sample_size<-1000
 
 # random  correlation 0-.99
 # random gini1 0.1-.9
@@ -177,10 +177,10 @@ write.csv(results, paste0('simresults', sample_size, format(Sys.time(), "%Y%m%d%
 sd(diff.logistic, na.rm=TRUE)
 sd(diff.probit, na.rm=TRUE)
 
-res40000<-read.csv("simresults4000020220428233229.csv")
-res10000<-read.csv("simresults1000020220428223014.csv")
-res1000<-read.csv("simresults100020220428212247.csv")
-res100000<-read.csv("simresults10000020220429000403.csv")
+res40000<-read.csv("ScoringCalculators/simresults4000020220428233229.csv")
+res10000<-read.csv("ScoringCalculators/simresults1000020220428223014.csv")
+res1000<-read.csv("ScoringCalculators/simresults100020220428212247.csv")
+res100000<-read.csv("ScoringCalculators/simresults10000020220429000403.csv")
 
 
 hist(res1000$diff.logistic, freq=FALSE, ylim=c(0,600), breaks=(-35:35)/1000)
@@ -198,3 +198,4 @@ boxplot(list(res1000$diff.logistic[!is.na(res1000$diff.logistic)],
      res100000$diff.logistic[!is.na(res100000$diff.logistic)]),
      horizontal=TRUE
 )
+
