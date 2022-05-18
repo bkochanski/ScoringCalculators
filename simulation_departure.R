@@ -54,8 +54,8 @@ gini2_here<-0.6
 corr_here<-0.3
 badrate_here<-0.1
 
-sigma <- matrix(c(1, corr_here, r_from_gini(gini1_here, dfrate),
-                  corr_here, 1, r_from_gini(gini1_here, dfrate),
+sigma <- matrix(c(1, corr_here, r_from_gini(gini1_here, badrate_here),
+                  corr_here, 1, r_from_gini(gini1_here, badrate_here),
                   r_from_gini(gini1_here, badrate_here), r_from_gini(gini1_here, badrate_here), 1), 
                 nrow=3)
 z <- mvrnorm(100000,mu=rep(0, 3),Sigma=sigma)
@@ -63,22 +63,38 @@ df<-z
 df[,3]<-(z[,3]<qnorm(badrate_here))*1
 df<-data.frame(df)
 names(df)<-c('s1', 's2', 'default_flag')
-df$ls1<-log(df$s1-min(df$s1)+1)
-#sum(is.na(df$ls1))
-hist(df$ls1, breaks=100)
-df$ls2<-log(df$s2-min(df$s2)+1)
-#sum(is.na(df$ls1))
-hist(df$ls2, breaks=100)
+df$ms1<-(rank(df$s1)/length(df$s1))^6
+#sum(is.na(df$ms1))
+hist(df$ms1, breaks=100)
+df$ms2<-(rank(df$s2)/length(df$s2))^6
+#df$ms2<-log(df$s2-min(df$s2)+1)
+#sum(is.na(df$ms1))
+hist(df$ms2, breaks=100)
+hist(df$ms2^(1/6), breaks=100)
+hist(qnorm(df$ms2^(1/6)), breaks=100)
 
-gini_combine_1(gini1_here, gini2_here, corr_here, badrate_here)
+
+#gini_combine_1(gini1_here, gini2_here, corr_here, badrate_here)
 
 gini_combine_1(my_gini(df$default_flag, df$s1), my_gini(df$default_flag, df$s2), 
                cor(df$s1, df$s2), mean(df$default_flag))
 
-gini_combine_1(my_gini(df$default_flag, df$ls1), my_gini(df$default_flag, df$ls2), 
-               cor(df$ls1, df$ls2), mean(df$default_flag))
+gini_combine_1(my_gini(df$default_flag, df$ms1), my_gini(df$default_flag, df$ms2), 
+               cor(df$ms1, df$ms2), mean(df$default_flag))
 
-sum(is.na(df$ls1))
-sum(is.na(df$ls2))
-mean(df$ls1)
-mean(df$ls2)
+gini_combine_1(my_gini(df$default_flag, df$ms1), my_gini(df$default_flag, df$ms2), 
+               cor(df$ms1, df$ms2, method="spearman"), mean(df$default_flag))
+
+myprobit <- glm(I(1-default_flag) ~ ms1 + ms2, data = df, family = binomial(link="probit"))
+my_gini(myprobit$y, -myprobit$fitted.values)
+
+myprobit2 <- glm(I(1-default_flag) ~ s1 + s2, data = df, family = binomial(link="probit"))
+my_gini(myprobit2$y, -myprobit2$fitted.values)
+
+
+sum(is.na(df$ms1))
+sum(is.na(df$ms2))
+mean(df$ms1)
+mean(df$ms2)
+
+plot(rank(df$s1), df$ms1)
