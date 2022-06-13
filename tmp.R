@@ -1,7 +1,7 @@
 library(MASS)
 #set.seed(500)
 m <- 3
-n <- 100000
+n <- 1000
 sigma <- matrix(c(1, 0.4, 0.45,
                   0.4, 1, .65,
                   0.45, 0.65, 1), 
@@ -20,6 +20,21 @@ df<-z
 df[,3]<-y
 df<-data.frame(df)
 names(df)<-c('s1', 's2', 'default_flag')
+
+my_gini<-function(resp, pred){
+  c<-pred[order(pred)]
+  d<-resp[order(pred)]
+  bc<-c(0, cumsum(d)/sum(d))
+  gc<-c(0, cumsum(1-d)/sum(1-d))
+  sum((gc[2:(length(gc))]-gc[1:(length(gc)-1)])*(bc[2:(length(bc))]+bc[1:(length(bc)-1)]))-1} 
+
+my_gini(df$default_flag, df$s1)
+
+InformationValue::somersD(df$default_flag, 1-df$s1)
+
+DescTools::GoodmanKruskalGamma(df$default_flag, -df$s1)
+
+wilcox.test(df$s1~df$default_flag)
 
 ginic<-function(bc, gc){
   #function for gini when we have cumulative goods and bads vectors
@@ -57,6 +72,8 @@ gini_combine_calculator<-function(g1, g2, corr, defaultrate){
            a_opt=a_opt, score_1_weight=a_opt/(1+a_opt), score_2_weight=1/(1+a_opt), 
            rho1=rho_s1, rho2=rho_s2, new_corr=corr_opt))
 }
+
+
 
 
 (res1<-gini_combine_calculator(gini_crd(.45), gini_crd(.65), 0.4, 0.1))
