@@ -34,6 +34,7 @@ InformationValue::somersD(df$default_flag, 1-df$s1)
 
 DescTools::GoodmanKruskalGamma(df$default_flag, -df$s1)
 
+
 wilcox.test(df$s1~df$default_flag)
 
 ginic<-function(bc, gc){
