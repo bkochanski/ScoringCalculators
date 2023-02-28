@@ -98,3 +98,5 @@ mean(df$ms1)
 mean(df$ms2)
 
 plot(rank(df$s1), df$ms1)
+
+par()

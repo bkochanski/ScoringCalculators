@@ -138,8 +138,9 @@ gini_crd_test<-function(rho=0.5, defrate=0.1, gran=10000) {
   return(ginic(cumsum((drates_2i)/sum(drates_2i)), cumsum((1-drates_2i)/sum(1-drates_2i))))
 }
 
-gini_from_r()
-gini_crd_test(gran=100000000)
+a<-gini_from_r()
+
+b<-gini_crd_test(gran=200000000)
 
 gini_combine_calculator(0.4517029, 0.450631, 0.3589866, 0.2633053) 
 

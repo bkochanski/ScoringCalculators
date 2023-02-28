@@ -55,6 +55,23 @@ sigma <- matrix(c(1, corrs, r_from_gini(gini1, dfrate),
                   r_from_gini(gini1, dfrate), r_from_gini(gini2, dfrate), 1), 
                 nrow=3)
 z <- mvrnorm(n,mu=rep(0, m),Sigma=sigma)
+
+library(copula)
+# myCop <- tCopula(param=c(corrs,r_from_gini(gini1, dfrate),r_from_gini(gini2, dfrate)), dim = 3, dispstr = "un")
+# myMvd <- mvdc(copula=myCop, margins=c("gamma", "beta", "t"),
+#               paramMargins=list(list(shape=2, scale=1),
+#                                 list(shape1=2, shape2=2), 
+#                                 list(df=5)) )
+# z <- rMvdc(n, myMvd)
+
+myCop <- gumbelCopula(1.7, dim=3)
+myMvd <- mvdc(copula=myCop, margins=c("gamma", "beta", "norm"),
+              paramMargins=list(list(shape=2, scale=1),
+                                list(shape1=2, shape2=2),
+                                list()) )
+z <- rMvdc(n, myMvd)
+psych::pairs.panels(z, method="pearson")
+
 #library(psych)
 # cor(z)
 # cor(z,method='spearman')
@@ -86,6 +103,10 @@ my_gini(df$default_flag, probit1_a*df$s1+df$s2)
 f<-function(x){my_gini(df$default_flag, x*df$s1+df$s2)}
 res1_optim<-optimize(f, c(0,1000), maximum = TRUE)
 my_gini(df$default_flag, res1_optim$maximum*df$s1+df$s2)
+
+psych::pairs.panels(z, method="pearson")
+
+
 
 z2 <- mvrnorm(n,mu=rep(0, m),Sigma=sigma)
 #library(psych)
