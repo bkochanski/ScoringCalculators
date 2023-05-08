@@ -76,12 +76,6 @@ ui <- fluidPage(
             ),
             conditionalPanel(
               condition = "input.METHOD == 'BiFractal'",
-              checkboxInput("SAMEBETA",
-                          "Same shape",
-                          value = TRUE)
-            ),
-            conditionalPanel(
-              condition = "input.METHOD == 'BiFractal' && input.SAMEBETA==0",
               sliderInput("BETA2",
                           "Beta2:",
                           min = 0,
@@ -96,20 +90,17 @@ ui <- fluidPage(
                             max = 1.4,
                             value = 1.0,
                             step = 0.001)
+
             ),
             conditionalPanel(
               condition = "input.METHOD == 'BiNormal'",
-              checkboxInput("SAMESHAPE",
-                            "Same shape",
-                            value = TRUE)
-            ),            conditionalPanel(
-              condition = "input.METHOD == 'BiNormal' && input.SAMESHAPE==0",
               sliderInput("SHAPE2",
                           "Shape2:",
                           min = 0.7,
                           max = 1.4,
                           value = 1.0,
                           step = 0.001)
+              
             )
             
 
@@ -189,22 +180,18 @@ server <- function(input, output) {
         )
         input$BETA1})
     
-    samebeta <- reactive(input$SAMEBETA)
-    
     beta2 <- reactive({
       validate(
         need(input$BETA2 >= 0 && input$BETA2 <= 1, "Please select BETA2 value between 0 and 1")
       )
       input$BETA2})
-
+    
     shape1 <- reactive({
         validate(
             need(input$SHAPE1 >=0.7 && input$SHAPE1<=1.4, "Please select shape1 value closer to 1")
         )
         input$SHAPE1  })
- 
-    sameshape <- reactive(input$SAMESHAPE)
-       
+    
     shape2 <- reactive({
       validate(
         need(input$SHAPE2 >=0.7 && input$SHAPE2<=1.4, "Please select shape2 value closer to 1")
@@ -357,7 +344,7 @@ server <- function(input, output) {
     
     # BI FRACTAL
     y0_bf<-function(x){FuncBiFractal(x,GINI1(), beta1())}
-    y1_bf<-function(x){FuncBiFractal(x,GINI2(), ifelse(samebeta(), beta1(), beta2()))}
+    y1_bf<-function(x){FuncBiFractal(x,GINI2(), beta2())}
     # 
     # phi1_bf<-function(x){(1-B())*(1-x)+B()*(1-y0_bf(x))-a0()}
     # x0_bf<-reactive({as.numeric(uniroot(phi1_bf,lower=0,upper=1,tol = .Machine$double.eps))[1]})
@@ -436,7 +423,7 @@ server <- function(input, output) {
     ########
     # BI NORMAL
     y0_bn<-function(x){FuncBiNormal(x,GINI1(), shape1())}
-    y1_bn<-function(x){FuncBiNormal(x,GINI2(), ifelse(sameshape(), shape1(), shape2()))}
+    y1_bn<-function(x){FuncBiNormal(x,GINI2(), shape2())}
     
     # phi1_bn<-function(x){(1-B())*(1-x)+B()*(1-y0_bn(x))-a0()}
     # x0_bn<-reactive({as.numeric(uniroot(phi1_bn,lower=0,upper=1,tol = .Machine$double.eps))[1]})

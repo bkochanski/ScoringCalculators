@@ -45,7 +45,7 @@ ui <- fluidPage(
             selectInput("METHOD", "Curve function",
                         choices = c("MidNormal", "MidFractal", "BiFractal", "BiNormal"),
                         selected = "MidNormal"),
-            setSliderColor(c("dodgerblue2", "olivedrab", "lightcoral", "firebrick", "gold", "gold", "lightblue", "lightblue"),c(1,2,3,4, 5,6, 7, 8)),
+            setSliderColor(c("dodgerblue2", "olivedrab", "lightcoral", "firebrick", "gold", "lightblue"),c(1,2,3,4, 5,6)),
             sliderInput("GINI1",
                         "GINI 1:",
                         min = 0,
@@ -68,50 +68,23 @@ ui <- fluidPage(
                         value = 60),
             conditionalPanel(
                 condition = "input.METHOD == 'BiFractal'",
-                sliderInput("BETA1",
-                            "Beta1:",
+                sliderInput("BETA",
+                            "Beta:",
                             min = 0,
                             max = 1,
                             value = 0.5)
             ),
             conditionalPanel(
-              condition = "input.METHOD == 'BiFractal'",
-              checkboxInput("SAMEBETA",
-                          "Same shape",
-                          value = TRUE)
-            ),
-            conditionalPanel(
-              condition = "input.METHOD == 'BiFractal' && input.SAMEBETA==0",
-              sliderInput("BETA2",
-                          "Beta2:",
-                          min = 0,
-                          max = 1,
-                          value = 0.5)
-            ),
-            conditionalPanel(
                 condition = "input.METHOD == 'BiNormal'",
-                sliderInput("SHAPE1",
-                            "Shape1:",
+                sliderInput("SHAPE",
+                            "Shape:",
                             min = 0.7,
                             max = 1.4,
                             value = 1.0,
                             step = 0.001)
-            ),
-            conditionalPanel(
-              condition = "input.METHOD == 'BiNormal'",
-              checkboxInput("SAMESHAPE",
-                            "Same shape",
-                            value = TRUE)
-            ),            conditionalPanel(
-              condition = "input.METHOD == 'BiNormal' && input.SAMESHAPE==0",
-              sliderInput("SHAPE2",
-                          "Shape2:",
-                          min = 0.7,
-                          max = 1.4,
-                          value = 1.0,
-                          step = 0.001)
+
             )
-            
+
 
         ),
 
@@ -183,33 +156,18 @@ server <- function(input, output) {
         )
         input$a0/100})
     
-    beta1 <- reactive({
+    beta <- reactive({
         validate(
-            need(input$BETA1 >= 0 && input$BETA1 <= 1, "Please select BETA1 value between 0 and 1")
+            need(input$BETA >= 0 && input$BETA <= 1, "Please select BETA value between 0 and 1")
         )
-        input$BETA1})
+        input$BETA})
     
-    samebeta <- reactive(input$SAMEBETA)
-    
-    beta2 <- reactive({
-      validate(
-        need(input$BETA2 >= 0 && input$BETA2 <= 1, "Please select BETA2 value between 0 and 1")
-      )
-      input$BETA2})
-
-    shape1 <- reactive({
+    shape <- reactive({
         validate(
-            need(input$SHAPE1 >=0.7 && input$SHAPE1<=1.4, "Please select shape1 value closer to 1")
+            need(input$SHAPE >=0.7 && input$SHAPE<=1.4, "Please select shape value closer to 1")
         )
-        input$SHAPE1  })
- 
-    sameshape <- reactive(input$SAMESHAPE)
-       
-    shape2 <- reactive({
-      validate(
-        need(input$SHAPE2 >=0.7 && input$SHAPE2<=1.4, "Please select shape2 value closer to 1")
-      )
-      input$SHAPE2  })
+        input$SHAPE  })
+    
     
     method <- reactive({input$METHOD})
     
@@ -356,8 +314,8 @@ server <- function(input, output) {
     ########
     
     # BI FRACTAL
-    y0_bf<-function(x){FuncBiFractal(x,GINI1(), beta1())}
-    y1_bf<-function(x){FuncBiFractal(x,GINI2(), ifelse(samebeta(), beta1(), beta2()))}
+    y0_bf<-function(x){FuncBiFractal(x,GINI1(), beta())}
+    y1_bf<-function(x){FuncBiFractal(x,GINI2(), beta())}
     # 
     # phi1_bf<-function(x){(1-B())*(1-x)+B()*(1-y0_bf(x))-a0()}
     # x0_bf<-reactive({as.numeric(uniroot(phi1_bf,lower=0,upper=1,tol = .Machine$double.eps))[1]})
@@ -435,8 +393,8 @@ server <- function(input, output) {
     profit3_change_bf <- reactive({profit3_bf()/profit0_bf()-1})
     ########
     # BI NORMAL
-    y0_bn<-function(x){FuncBiNormal(x,GINI1(), shape1())}
-    y1_bn<-function(x){FuncBiNormal(x,GINI2(), ifelse(sameshape(), shape1(), shape2()))}
+    y0_bn<-function(x){FuncBiNormal(x,GINI1(), shape())}
+    y1_bn<-function(x){FuncBiNormal(x,GINI2(), shape())}
     
     # phi1_bn<-function(x){(1-B())*(1-x)+B()*(1-y0_bn(x))-a0()}
     # x0_bn<-reactive({as.numeric(uniroot(phi1_bn,lower=0,upper=1,tol = .Machine$double.eps))[1]})
