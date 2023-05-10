@@ -122,7 +122,15 @@ ui <- fluidPage(
                      tableOutput("table1"),
                      tableOutput("table2"),
                      tableOutput("table3")
-                     )
+                     ),
+            # tabPanel("Instructions", 
+            #          mainPanel(
+            #            h2("Curve function")
+            #            , p("Choose a curve function: Binormal and Bifractal currently available. Midnormal is a binormal with shape parameter set to 1. Midfractal is bifractal with beta parameter set to 0.5")
+            #            , a("Bifractal", href="https://www.google.com/")
+            #            , 
+            #          )
+            #          )
             
           )
         ),
@@ -550,21 +558,36 @@ server <- function(input, output) {
         }
         point_id <- c("a", "b", "c", "d")
         df <- data.frame(xcord, ycord, point_id)
+        df$labels <- c('', paste("[1] Bad rate change:\n", ifelse(b1_change>0,"+",""), round(100*b1_change, 3), "%", sep = ""),
+                       paste("[2] Approval change:\n", ifelse(a2_change>0,"+",""), round(100*a2_change, 3), "%", sep = ""),
+                       paste("[3] Profit change:\n", ifelse(profit3_change>0,"+",""), round(100*profit3_change, 3), "%", sep = ""))
         
         
         ggplot(data.frame(x=c(0,1)), aes(x)) +
             stat_function(fun = y0, geom = "line", aes(colour = "y0"), lwd = 1.1) +
             stat_function(fun = y1, geom = "line", aes(colour = "y1"), linetype= "dashed", lwd = 1.1) +
-            scale_colour_manual("ROC Curve", values = c("dodgerblue2", "olivedrab"), breaks = waiver(), labels=c("scoring 1", "scoring 2")) +
+            scale_colour_manual("ROC Curve", values = c("dodgerblue2", "olivedrab"), breaks = waiver(), labels=c("Scoring 1", "Scoring 2")) +
             geom_point(data = df[1,], aes(xcord, ycord, shape = factor(point_id)),  colour = "black", fill = "dodgerblue2", size = 4, stroke = 1.5) +
             geom_point(data = df[c(2,3, 4),], aes(xcord, ycord, shape = factor(point_id)), colour = "black", fill = "olivedrab", size = 4, stroke = 1.5) +
-            scale_shape_manual("Point",values = c('a' = 21, 'b' = 22, 'c' = 24, 'd' = 23), labels = c("Currently", "Bad rate reduction scenario", "Approval rate improvement scenario", "Profit increase scenario")) +
+#            geom_point(data = df[1:4], aes(xcord, ycord, shape = factor(point_id)),  colour = "black", fill = c("dodgerblue2", "olivedrab", "olivedrab", "olivedrab"), size = 4, stroke = 1.5) +
+            scale_shape_manual("Point",
+                               values = c('a' = 21, 'b' = 22, 'c' = 24, 'd' = 23), 
+                               labels = c("Currently", "[1] Bad rate reduction\n scenario (keep approval)", "[2] Approval rate\n improvement scenario\n (keep bad rate)", "[3] Profit increase\n scenario (keep marginal\n bad rate)")) +
             xlab("cumulative good proportion") + ylab("cumulative bad proportion") + ggtitle("") + 
-            theme(legend.position="bottom", legend.box = "vertical", axis.text=element_text(size=14), axis.title=element_text(size=16,face="bold")) +
-            guides(color = guide_legend(order = 1)) + 
-            geom_text(x=xcord[2], y=ycord[2], label = paste(round(100*b1_change, 3), "%", sep = " "), hjust = 1, vjust = -1, aes(size = 2), show.legend = FALSE ) +
-            geom_text(x=xcord[3], y=ycord[3], label = paste(round(100*a2_change, 3), "%", sep = " "), hjust = 1, vjust = -1, aes(size = 2), show.legend = FALSE ) +
-            geom_text(x=xcord[4], y=ycord[4], label = paste(round(100*profit3_change, 3), "%", sep = " "), hjust = 1, vjust = -1, aes(size = 2), show.legend = FALSE )
+            theme(legend.position="bottom", 
+                  legend.box = "vertical", 
+                  axis.text=element_text(size=14), 
+                  axis.title=element_text(size=16,face="bold"),
+                  legend.text=element_text(size=11)) +
+            guides(color = guide_legend(order = 1)) +
+            geom_text_repel(data = df[2:4,],
+                mapping = aes(x=xcord, y=ycord, label = labels),
+                size=5,
+                min.segment.length = 0,
+                hjust = 1, vjust = -1, show.legend = FALSE)
+            # geom_text_repel(x=xcord[2], y=ycord[2], label = paste("[1] Bad rate change:\n", round(100*b1_change, 3), "%", sep = ""), hjust = 1, vjust = -1, aes(size = 2), show.legend = FALSE ) +
+            # geom_text(x=xcord[3], y=ycord[3], label = paste("[2] Approval change:\n", round(100*a2_change, 3), "%", sep = ""), hjust = 1, vjust = -1, aes(size = 2), show.legend = FALSE ) +
+            # geom_text(x=xcord[4], y=ycord[4], label = paste("[3] Profit change:\n", round(100*profit3_change, 3), "%", sep = ""), hjust = 1, vjust = -1, aes(size = 2), show.legend = FALSE )
         # # code responsible for the square shape of the plot
     }
     # ,height=reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0))
@@ -575,36 +598,36 @@ server <- function(input, output) {
     output$table1 <- renderTable(
       if(method() == "MidNormal"){
       setDT(
-      data.frame(no=1:3, scenario=c('keep approval', 'keep bad rate', 'keep marginal badrate'), approval_change=c(paste(round(100*a1_change(), 3), "%", sep = " "), paste(round(100*a2_change(), 3), "%", sep = " "), paste(round(100*a3_change(), 3), "%", sep = " ")),
-                 badrate_change=c(paste(round(100*b1_change(), 3),"%", sep= " "), paste(round(100*b2_change(), 3),"%", sep= " "), paste(round(100*b3_change(), 3),"%", sep= " ")),
-                 profit_change=c(paste(round(100*profit1_change(), 3), "%", sep = " "), paste(round(100*profit2_change(), 3), "%", sep = " "), paste(round(100*profit3_change(), 3), "%", sep = " "))
+      data.frame(no=1:3, scenario=c('keep approval (bad rate reduction)', 'keep bad rate (approval rate improvement)', 'keep marginal bad rate (profit increase)'), approval_change=c(paste(round(100*a1_change(), 3), "%", sep = ""), paste(round(100*a2_change(), 3), "%", sep = ""), paste(round(100*a3_change(), 3), "%", sep = "")),
+                 bad_rate_change=c(paste(round(100*b1_change(), 3),"%", sep= " "), paste(round(100*b2_change(), 3),"%", sep= " "), paste(round(100*b3_change(), 3),"%", sep= " ")),
+                 profit_change=c(paste(round(100*profit1_change(), 3), "%", sep = ""), paste(round(100*profit2_change(), 3), "%", sep = ""), paste(round(100*profit3_change(), 3), "%", sep = ""))
                  )
     
       ) 
       }
       else if(method() == "MidFractal") {
         setDT(
-          data.frame(no=1:3, scenario=c('keep approval', 'keep bad rate', 'keep marginal badrate'), approval_change=c(paste(round(100*a1_change_mf(), 3), "%", sep = " "), paste(round(100*a2_change_mf(), 3), "%", sep = " "), paste(round(100*a3_change_mf(), 3), "%", sep = " ")),
-                     badrate_change=c(paste(round(100*b1_change_mf(), 3), "%", sep = " "), paste(round(100*b2_change_mf(), 3), "%", sep = " "), paste(round(100*b3_change_mf(), 3), "%", sep = " ")),
-                     profit_change=c(paste(round(100*profit1_change_mf(), 3), "%", sep = " "), paste(round(100*profit2_change_mf(), 3), "%", sep = " "), paste(round(100*profit3_change_mf(), 3), "%", sep = " "))
+          data.frame(no=1:3, scenario=c('keep approval (bad rate reduction)', 'keep bad rate (approval rate improvement)', 'keep marginal bad rate (profit increase)'), approval_change=c(paste(round(100*a1_change_mf(), 3), "%", sep = ""), paste(round(100*a2_change_mf(), 3), "%", sep = ""), paste(round(100*a3_change_mf(), 3), "%", sep = "")),
+                     bad_rate_change=c(paste(round(100*b1_change_mf(), 3), "%", sep = ""), paste(round(100*b2_change_mf(), 3), "%", sep = ""), paste(round(100*b3_change_mf(), 3), "%", sep = "")),
+                     profit_change=c(paste(round(100*profit1_change_mf(), 3), "%", sep = ""), paste(round(100*profit2_change_mf(), 3), "%", sep = ""), paste(round(100*profit3_change_mf(), 3), "%", sep = ""))
           )
           
         )
       }
       else if(method() == "BiFractal") {
         setDT(
-          data.frame(no=1:3, scenario=c('keep approval', 'keep bad rate', 'keep marginal badrate'), approval_change=c(paste(round(100*a1_change_bf(), 3), "%", sep = " "), paste(round(100*a2_change_bf(), 3), "%", sep = " "), paste(round(100*a3_change_bf(), 3), "%", sep = " ")),
-                     badrate_change=c(paste(round(100*b1_change_bf(), 3), "%", sep = " "), paste(round(100*b2_change_bf(), 3), "%", sep = " "), paste(round(100*b3_change_bf(), 3), "%", sep = " ")),
-                     profit_change=c(paste(round(100*profit1_change_bf(), 3), "%", sep = " "), paste(round(100*profit2_change_bf(), 3), "%", sep = " "), paste(round(100*profit3_change_bf(), 3), "%", sep = " "))
+          data.frame(no=1:3, scenario=c('keep approval (bad rate reduction)', 'keep bad rate (approval rate improvement)', 'keep marginal bad rate (profit increase)'), approval_change=c(paste(round(100*a1_change_bf(), 3), "%", sep = ""), paste(round(100*a2_change_bf(), 3), "%", sep = ""), paste(round(100*a3_change_bf(), 3), "%", sep = "")),
+                     bad_rate_change=c(paste(round(100*b1_change_bf(), 3), "%", sep = ""), paste(round(100*b2_change_bf(), 3), "%", sep = ""), paste(round(100*b3_change_bf(), 3), "%", sep = "")),
+                     profit_change=c(paste(round(100*profit1_change_bf(), 3), "%", sep = ""), paste(round(100*profit2_change_bf(), 3), "%", sep = ""), paste(round(100*profit3_change_bf(), 3), "%", sep = ""))
           )
           
         )
       }
       else if(method() == "BiNormal") {
         setDT(
-          data.frame(no=1:3, scenario=c('keep approval', 'keep bad rate', 'keep marginal bad rate'), approval_change=c(paste(round(100*a1_change_bn(), 3), "%", sep = " "), paste(round(100*a2_change_bn(), 3), "%", sep = " "), paste(round(100*a3_change_bn(), 3), "%", sep = " ")),
-                     badrate_change=c(paste(round(100*b1_change_bn(), 3), "%", sep = " "), paste(round(100*b2_change_bn(), 3), "%", sep = " "), paste(round(100*b3_change_bn(), 3), "%", sep = " ")),
-                     profit_change=c(paste(round(100*profit1_change_bn(), 3), "%", sep = " "), paste(round(100*profit2_change_bn(), 3), "%", sep = " "), paste(round(100*profit3_change_bn(), 3), "%", sep = " "))
+          data.frame(no=1:3, scenario=c('keep approval (bad rate reduction)', 'keep bad rate (approval rate improvement)', 'keep marginal bad rate (profit increase)'), approval_change=c(paste(round(100*a1_change_bn(), 3), "%", sep = ""), paste(round(100*a2_change_bn(), 3), "%", sep = ""), paste(round(100*a3_change_bn(), 3), "%", sep = "")),
+                     bad_rate_change=c(paste(round(100*b1_change_bn(), 3), "%", sep = ""), paste(round(100*b2_change_bn(), 3), "%", sep = ""), paste(round(100*b3_change_bn(), 3), "%", sep = "")),
+                     profit_change=c(paste(round(100*profit1_change_bn(), 3), "%", sep = ""), paste(round(100*profit2_change_bn(), 3), "%", sep = ""), paste(round(100*profit3_change_bn(), 3), "%", sep = ""))
           )
           
         )
@@ -617,10 +640,10 @@ server <- function(input, output) {
     output$table2 <- renderTable(
       if(method() == "MidNormal"){
         setDT(
-          data.frame(scenario=1:3, existing_approval=rep(paste(round(100*a0(), 3), "%", sep = " "),3), 
-                     new_approval= c(paste(round(100*a1(), 3), "%", sep = " "), paste(round(100*a2(), 3), "%", sep = " "), paste(round(100*a3(), 3), "%", sep = " ")),
-                     existing_badrate= rep(paste(round(100*b0(), 3), "%", sep = " "),3),
-                     new_badrate= c(paste(round(100*b1(), 3), "%", sep = " "), paste(round(100*b2(), 3), "%", sep = " "), paste(round(100*b3(), 3), "%", sep = " ")),
+          data.frame(scenario=1:3, existing_approval=rep(paste(round(100*a0(), 3), "%", sep = ""),3), 
+                     new_approval= c(paste(round(100*a1(), 3), "%", sep = ""), paste(round(100*a2(), 3), "%", sep = ""), paste(round(100*a3(), 3), "%", sep = "")),
+                     existing_bad_rate= rep(paste(round(100*b0(), 3), "%", sep = ""),3),
+                     new_bad_rate= c(paste(round(100*b1(), 3), "%", sep = ""), paste(round(100*b2(), 3), "%", sep = ""), paste(round(100*b3(), 3), "%", sep = "")),
                      existing_profit= 100*rep(profit0(), 3),
                      new_profit= 100*c(profit1(), profit2(), profit3())
           )
@@ -629,10 +652,10 @@ server <- function(input, output) {
       }
       else if(method() == "MidFractal") {
         setDT(
-          data.frame(scenario=1:3, existing_approval=rep(paste(round(100*a0(), 3), "%", sep = " "),3), 
-                     new_approval=c(paste(round(100*a1_mf(), 3), "%", sep = " "), paste(round(100*a2_mf(), 3), "%", sep = " "), paste(round(100*a3_mf(), 3), "%", sep = " ")),
-                     existing_badrate=rep(paste(round(100*b0_mf(), 3), "%", sep = " "),3),
-                     new_badrate=c(paste(round(100*b1_mf(), 3), "%", sep = " "),paste(round(100*b2_mf(), 3), "%", sep = " "),paste(round(100*b3_mf(), 3), "%", sep = " ")),
+          data.frame(scenario=1:3, existing_approval=rep(paste(round(100*a0(), 3), "%", sep = ""),3), 
+                     new_approval=c(paste(round(100*a1_mf(), 3), "%", sep = ""), paste(round(100*a2_mf(), 3), "%", sep = ""), paste(round(100*a3_mf(), 3), "%", sep = "")),
+                     existing_bad_rate=rep(paste(round(100*b0_mf(), 3), "%", sep = ""),3),
+                     new_bad_rate=c(paste(round(100*b1_mf(), 3), "%", sep = ""),paste(round(100*b2_mf(), 3), "%", sep = ""),paste(round(100*b3_mf(), 3), "%", sep = "")),
                      existing_profit=100*rep(profit0_mf(), 3),
                      new_profit=100*c(profit1_mf(),profit2_mf(),profit3_mf())
           )
@@ -640,10 +663,10 @@ server <- function(input, output) {
       }
       else if(method() == "BiFractal") {
         setDT(
-        data.frame(scenario=1:3, existing_approval=rep(paste(round(100*a0(), 3), "%", sep = " "),3), 
-                   new_approval=c(paste(round(100*a1_bf(), 3), "%", sep = " "), paste(round(100*a2_bf(), 3), "%", sep = " "), paste(round(100*a3_bf(), 3), "%", sep = " ")),
-                   existing_badrate=rep(paste(round(100*b0_bf(), 3), "%", sep = " "),3),
-                   new_badrate=c(paste(round(100*b1_bf(), 3), "%", sep = " "),paste(round(100*b2_bf(), 3), "%", sep = " "),paste(round(100*b3_bf(), 3), "%", sep = " ")),
+        data.frame(scenario=1:3, existing_approval=rep(paste(round(100*a0(), 3), "%", sep = ""),3), 
+                   new_approval=c(paste(round(100*a1_bf(), 3), "%", sep = ""), paste(round(100*a2_bf(), 3), "%", sep = ""), paste(round(100*a3_bf(), 3), "%", sep = "")),
+                   existing_bad_rate=rep(paste(round(100*b0_bf(), 3), "%", sep = ""),3),
+                   new_bad_rate=c(paste(round(100*b1_bf(), 3), "%", sep = ""),paste(round(100*b2_bf(), 3), "%", sep = ""),paste(round(100*b3_bf(), 3), "%", sep = "")),
                    existing_profit=100*rep(profit0_bf(), 3),
                    new_profit=100*c(profit1_bf(), profit2_bf(), profit3_bf())
           )
@@ -651,10 +674,10 @@ server <- function(input, output) {
       }
       else if(method() == "BiNormal") {
         setDT(
-        data.frame(scenario=1:3, existing_approval=rep(paste(round(100*a0(), 3), "%", sep = " "),3), 
-                   new_approval=c(paste(round(100*a1_bn(), 3), "%", sep = " "), paste(round(100*a2_bn(), 3), "%", sep = " "), paste(round(100*a3_bn(), 3), "%", sep = " ")),
-                   existing_badrate=rep(paste(round(100*b0_bn(), 3), "%", sep = " "),3),
-                   new_badrate=c(paste(round(100*b1_bn(), 3), "%", sep = " "),paste(round(100*b2_bn(), 3), "%", sep = " "),paste(round(100*b3_bn(), 3), "%", sep = " ")),
+        data.frame(scenario=1:3, existing_approval=rep(paste(round(100*a0(), 3), "%", sep = ""),3), 
+                   new_approval=c(paste(round(100*a1_bn(), 3), "%", sep = ""), paste(round(100*a2_bn(), 3), "%", sep = ""), paste(round(100*a3_bn(), 3), "%", sep = "")),
+                   existing_bad_rate=rep(paste(round(100*b0_bn(), 3), "%", sep = ""),3),
+                   new_bad_rate=c(paste(round(100*b1_bn(), 3), "%", sep = ""),paste(round(100*b2_bn(), 3), "%", sep = ""),paste(round(100*b3_bn(), 3), "%", sep = "")),
                    existing_profit=100*rep(profit0_bn(), 3),
                    new_profit=100*c(profit1_bn(), profit2_bn(), profit3_bn())
         )    
@@ -668,8 +691,8 @@ server <- function(input, output) {
           data.frame(scenario=1:3, 
                      existing_portfolio_gini = rep(ginip0(),3),
                      new_portfolio_gini = c(ginip1(), ginip2(), ginip3()),
-                     existing_marginal_bad_rate = rep(paste(round(100*mbr0(), 3), "%", sep = " "),3)
-                     ,new_marginal_bad_rate = c(paste(round(100*mbr1(), 3), "%", sep = " "), paste(round(100*mbr2(), 3), "%", sep = " "), paste(round(100*mbr3(), 3), "%", sep = " "))
+                     existing_marginal_bad_rate = rep(paste(round(100*mbr0(), 3), "%", sep = ""),3)
+                     ,new_marginal_bad_rate = c(paste(round(100*mbr1(), 3), "%", sep = ""), paste(round(100*mbr2(), 3), "%", sep = ""), paste(round(100*mbr3(), 3), "%", sep = ""))
           )
           
         )
@@ -679,8 +702,8 @@ server <- function(input, output) {
           data.frame(scenario=1:3, 
                      existing_portfolio_gini = rep(ginip0_mf(),3),
                      new_portfolio_gini = c(ginip1_mf(), ginip2_mf(), ginip3_mf()),
-                     existing_marginal_bad_rate = rep(paste(round(100*mbr0_mf(), 3), "%", sep = " "),3), 
-                     new_marginal_bad_rate = c(paste(round(100*mbr1_mf(), 3), "%", sep = " "), paste(round(100*mbr2_mf(), 3), "%", sep = " "), paste(round(100*mbr3_mf(), 3), "%", sep = " "))
+                     existing_marginal_bad_rate = rep(paste(round(100*mbr0_mf(), 3), "%", sep = ""),3), 
+                     new_marginal_bad_rate = c(paste(round(100*mbr1_mf(), 3), "%", sep = ""), paste(round(100*mbr2_mf(), 3), "%", sep = ""), paste(round(100*mbr3_mf(), 3), "%", sep = ""))
           )
         )
       }
@@ -689,8 +712,8 @@ server <- function(input, output) {
           data.frame(scenario=1:3, 
                      existing_portfolio_gini = rep(ginip0_bf(),3),
                      new_portfolio_gini = c(ginip1_bf(), ginip2_bf(), ginip3_bf()),
-                     existing_marginal_bad_rate = rep(paste(round(100*mbr0_bf(), 3), "%", sep = " "),3), 
-                     new_marginal_bad_rate = c(paste(round(100*mbr1_bf(), 3), "%", sep = " "), paste(round(100*mbr2_bf(), 3), "%", sep = " "), paste(round(100*mbr3_bf(), 3), "%", sep = " "))
+                     existing_marginal_bad_rate = rep(paste(round(100*mbr0_bf(), 3), "%", sep = ""),3), 
+                     new_marginal_bad_rate = c(paste(round(100*mbr1_bf(), 3), "%", sep = ""), paste(round(100*mbr2_bf(), 3), "%", sep = ""), paste(round(100*mbr3_bf(), 3), "%", sep = ""))
           )
         )
       }
@@ -699,11 +722,11 @@ server <- function(input, output) {
           data.frame(scenario=1:3, 
                      existing_portfolio_gini = rep(ginip0_bn(),3),
                      new_portfolio_gini = c(ginip1_bn(), ginip2_bn(), ginip3_bn()),
-                     existing_marginal_bad_rate = rep(paste(round(100*mbr0_bn(), 3), "%", sep = " "),3), 
-                     new_marginal_bad_rate = c(paste(round(100*mbr1_bn(), 3), "%", sep = " "), paste(round(100*mbr2_bn(), 3), "%", sep = " "), paste(round(100*mbr3_bn(), 3), "%", sep = " "))
+                     existing_marginal_bad_rate = rep(paste(round(100*mbr0_bn(), 3), "%", sep = ""),3), 
+                     new_marginal_bad_rate = c(paste(round(100*mbr1_bn(), 3), "%", sep = ""), paste(round(100*mbr2_bn(), 3), "%", sep = ""), paste(round(100*mbr3_bn(), 3), "%", sep = ""))
           ) 
         )
-      }
+      }, digits=3
     )
     
     output$text1 <- renderText({
