@@ -111,6 +111,8 @@ ui <- fluidPage(
                           value = 1.0,
                           step = 0.001)
             )
+            
+
         ),
 
         mainPanel(
@@ -134,6 +136,25 @@ ui <- fluidPage(
         ),
 
     ) , br(), br(), br(),
+    
+    
+    # wellPanel(
+    #     tableOutput("table1"),
+    #     tableOutput("table2"),
+    #     tableOutput("table3")
+    #     #htmlOutput("text1")
+    #     # verbatimTextOutput("verb1"),
+    #     # textOutput("text2")
+    #     # verbatimTextOutput("verb2"),
+    #     # textOutput("text3"),
+    #     # verbatimTextOutput("verb3"),
+    #     # textOutput("text4"),
+    #     # verbatimTextOutput("verb4"),
+    #     # textOutput("text5"),
+    #     # verbatimTextOutput("verb5")
+    # )
+    # ,
+    # submitButton("Create a plot!")
 )
 
 # FUNCTIONS:
@@ -143,10 +164,12 @@ FuncMidFractal<-function(x,g){0.5*(1-(1-x)^((1+g)/(1-g)))+0.5*x^((1-g)/(1+g))}
 FuncBiFractal<-function(x,g, beta){beta*(1-(1-x)^((1+g)/(1-g)))+(1-beta)*x^((1-g)/(1+g))}
 FuncBiNormal<-function(x,g,shape){pnorm(qnorm((g+1)/2)*sqrt(1+shape^2)+shape*qnorm(x))}
 
-GiniP<-function(f, x){2*(integrate(f,x,1)$value-(1-x)*f(x))/((1-x)*(1-f(x)))-1}
+GiniP<-function(f, x){2*(integrate(f,x,1)$value-(1-x)*f(x))/((1-x)*(1-f(x)))-1
+}
 
 server <- function(input, output) {
     
+    # G1_react <- reactive({get(input$GINI1, 'package:datasets')})
     GINI1<-reactive({
         validate(
             need(input$GINI1 < 1 && input$GINI1 > 0, "Please select GINI1 value between 0 and 1")
@@ -198,10 +221,7 @@ server <- function(input, output) {
     
     method <- reactive({input$METHOD})
     
-    ############# 
     # MID NORMAL
-    #############
-    
     y0<-function(x){FuncMidNormal(x,GINI1())}
     y1<-function(x){FuncMidNormal(x,GINI2())}
     
@@ -215,7 +235,6 @@ server <- function(input, output) {
     profit0 <- reactive({a0()*(ir0()*(1-b0())-b0())})
     ginip0 <- reactive({GiniP(y0,x0())})
     
-    ## 1. Bad rate reduction scenario (keep approval)
     
     a1 <- reactive({a0()})
     phi1<-function(x){(1-B())*(1-x)+B()*(1-y1(x))-a1()}
@@ -230,8 +249,6 @@ server <- function(input, output) {
     a1_change <- reactive({a1()/a0()-1})
     b1_change <- reactive({b1()/b0()-1})
     profit1_change <- reactive({profit1()/profit0()-1})
-    
-    ## 2. Approval rate increase scenario (keep bad rate)
     
     b2 <- reactive({b0()})
     phi2<-function(x){B()*(1-y1(x))/((1-B())*(1-x)+B()*(1-y1(x)))-b2()}
@@ -248,12 +265,13 @@ server <- function(input, output) {
     b2_change <- reactive({b2()/b0()-1})
     profit2_change <- reactive({profit2()/profit0()-1})
     
-    ## 3. Profit increase scenario (keep marginal bad rate)
-    
+   
+    ## NEW SCENARIO
     phi3<-function(x){numDeriv::grad(y1, x)-deriv0()}
     x3 <- reactive({as.numeric(uniroot(phi3,lower=0+1/1000,upper=1-1/1000,tol = .Machine$double.eps)[1])})
     a3 <- reactive({((1-B())*(1-x3())+B()*(1-y1(x3())))})
     b3 <- reactive({B()*(1-y1(x3()))/a3()})
+    
     
     deriv3 <- reactive({numDeriv::grad(y1, x3())})
     mbr3 <- reactive({(1+(1-B())/B()/deriv3())^(-1)})
@@ -264,14 +282,28 @@ server <- function(input, output) {
     a3_change <- reactive({a3()/a0()-1})
     b3_change <- reactive({b3()/b0()-1})
     profit3_change <- reactive({profit3()/profit0()-1})
-
-    ############# 
-    # MIDFRACTAL
-    #############
-
+    
+    # MID FRACTAL
     y0_mf<-function(x){FuncMidFractal(x,GINI1())}
     y1_mf<-function(x){FuncMidFractal(x,GINI2())}
     
+    # phi1_mf<-function(x){(1-B())*(1-x)+B()*(1-y0_mf(x))-a0()}
+    # x0_mf<-reactive({as.numeric(uniroot(phi1_mf,lower=0,upper=1,tol = .Machine$double.eps))[1]})
+    # 
+    # phi2_mf<-function(x){(1-B())*(1-x)+B()*(1-y1_mf(x))-a0()}
+    # x1_mf<-reactive({as.numeric(uniroot(phi2_mf,lower=0,upper=1,tol = .Machine$double.eps))[1]})
+    # 
+    # b0_mf <- reactive({B()*(1-y0_mf(x0_mf()))/a0()})
+    # b1_mf <- reactive({B()*(1-y1_mf(x1_mf()))/a0()})
+    # 
+    # phi3_mf<-function(x){B()*(1-y1_mf(x))/((1-B())*(1-x)+B()*(1-y1_mf(x)))-b0_mf()}
+    # x1prime_mf <- reactive({as.numeric(uniroot(phi3_mf,lower=0,upper=.99999999999,tol = .Machine$double.eps))[1]})
+    # a1_mf <- reactive({((1-B())*(1-x1prime_mf())+B()*(1-y1_mf(x1prime_mf())))})
+    # 
+    # phi_yn_x3_mf<-function(x){numDeriv::grad(y1, x)-deriv0()}
+    # x3_mf <- reactive({as.numeric(uniroot(phi_yn_x3_mf,lower=0+1/1000,upper=1-1/1000,tol = .Machine$double.eps))[1]})
+    # a3_mf <- reactive({((1-B())*(1-x3())+B()*(1-y1(x3())))})
+    # 
     ########
     phi0_mf<-function(x){(1-B())*(1-x)+B()*(1-y0_mf(x))-a0()}
     x0_mf<-reactive({as.numeric(uniroot(phi0_mf,lower=0,upper=1,tol = .Machine$double.eps)[1])})
@@ -283,7 +315,6 @@ server <- function(input, output) {
     profit0_mf <- reactive({a0()*(ir0_mf()*(1-b0_mf())-b0_mf())})
     ginip0_mf <- reactive({GiniP(y0_mf,x0_mf())})
     
-    ## 1. Bad rate reduction scenario (keep approval)
     
     a1_mf <- reactive({a0()})
     phi1_mf<-function(x){(1-B())*(1-x)+B()*(1-y1_mf(x))-a1_mf()}
@@ -298,9 +329,7 @@ server <- function(input, output) {
     a1_change_mf <- reactive({a1_mf()/a0()-1})
     b1_change_mf <- reactive({b1_mf()/b0_mf()-1})
     profit1_change_mf <- reactive({profit1_mf()/profit0_mf()-1})
-
-    ## 2. Approval rate increase scenario (keep bad rate)
-
+    
     b2_mf <- reactive({b0_mf()})
     phi2_mf <- function(x){B()*(1-y1_mf(x))/((1-B())*(1-x)+B()*(1-y1_mf(x)))-b2_mf()}
     x2_mf <- reactive({as.numeric(uniroot(phi2_mf,lower=0.001,upper=.999,tol = .Machine$double.eps)[1])})
@@ -315,13 +344,13 @@ server <- function(input, output) {
     a2_change_mf <- reactive({a2_mf()/a0()-1})
     b2_change_mf <- reactive({b2_mf()/b0_mf()-1})
     profit2_change_mf <- reactive({profit2_mf()/profit0_mf()-1})
-
-    ## 3. Profit increase scenario (keep marginal bad rate)
     
+   
     phi3_mf <- function(x){numDeriv::grad(y1_mf, x)-deriv0_mf()}
     x3_mf <- reactive({as.numeric(uniroot(phi3_mf,lower=0+1/1000,upper=1-1/1000,tol = .Machine$double.eps)[1])})
     a3_mf <- reactive({((1-B())*(1-x3_mf())+B()*(1-y1_mf(x3_mf())))})
     b3_mf <- reactive({B()*(1-y1_mf(x3_mf()))/a3_mf()})
+    
     
     deriv3_mf <- reactive({numDeriv::grad(y1_mf, x3_mf())})
     mbr3_mf <- reactive({(1+(1-B())/B()/deriv3_mf())^(-1)})
@@ -332,16 +361,30 @@ server <- function(input, output) {
     a3_change_mf <- reactive({a3_mf()/a0()-1})
     b3_change_mf <- reactive({b3_mf()/b0_mf()-1})
     profit3_change_mf <- reactive({profit3_mf()/profit0_mf()-1})
-    
-    ########
-    # BIFRACTAL
     ########
     
+    # BI FRACTAL
     y0_bf<-function(x){FuncBiFractal(x,GINI1(), beta1())}
     y1_bf<-function(x){FuncBiFractal(x,GINI2(), ifelse(samebeta(), beta1(), beta2()))}
-    
-    #####
-    
+    # 
+    # phi1_bf<-function(x){(1-B())*(1-x)+B()*(1-y0_bf(x))-a0()}
+    # x0_bf<-reactive({as.numeric(uniroot(phi1_bf,lower=0,upper=1,tol = .Machine$double.eps))[1]})
+    # 
+    # phi2_bf<-function(x){(1-B())*(1-x)+B()*(1-y1_bf(x))-a0()}
+    # x1_bf<-reactive({as.numeric(uniroot(phi2_bf,lower=0,upper=1,tol = .Machine$double.eps))[1]})
+    # 
+    # b0_bf <- reactive({B()*(1-y0_bf(x0_bf()))/a0()})
+    # b1_bf <- reactive({B()*(1-y1_bf(x1_bf()))/a0()})
+    # 
+    # phi3_bf<-function(x){B()*(1-y1_bf(x))/((1-B())*(1-x)+B()*(1-y1_bf(x)))-b0_bf()}
+    # x1prime_bf <- reactive({as.numeric(uniroot(phi3_bf,lower=0,upper=.99999999999,tol = .Machine$double.eps))[1]})
+    # a1_bf <- reactive({((1-B())*(1-x1prime_bf())+B()*(1-y1_bf(x1prime_bf())))})
+    # 
+    # phi_yn_x3_bf<-function(x){numDeriv::grad(y1, x)-deriv0()}
+    # x3_bf <- reactive({as.numeric(uniroot(phi_yn_x3_bf,lower=0+1/1000,upper=1-1/1000,tol = .Machine$double.eps))[1]})
+    # a3_bf <- reactive({((1-B())*(1-x3())+B()*(1-y1(x3())))})
+    # 
+    ########
     phi0_bf<-function(x){(1-B())*(1-x)+B()*(1-y0_bf(x))-a0()}
     x0_bf<-reactive({as.numeric(uniroot(phi0_bf,lower=0.001,upper=0.999,tol = .Machine$double.eps)[1])})
     b0_bf <- reactive({B()*(1-y0_bf(x0_bf()))/a0()})
@@ -351,8 +394,7 @@ server <- function(input, output) {
     ir0_bf <-  reactive({mbr0_bf()/(1-mbr0_bf())})
     profit0_bf <- reactive({a0()*(ir0_bf()*(1-b0_bf())-b0_bf())})
     ginip0_bf <- reactive({GiniP(y0_bf,x0_bf())})
-
-    ## 1. Bad rate reduction scenario (keep approval)
+    
     
     a1_bf <- reactive({a0()})
     phi1_bf<-function(x){(1-B())*(1-x)+B()*(1-y1_bf(x))-a1_bf()}
@@ -367,8 +409,6 @@ server <- function(input, output) {
     a1_change_bf <- reactive({a1_bf()/a0()-1})
     b1_change_bf <- reactive({b1_bf()/b0_bf()-1})
     profit1_change_bf <- reactive({profit1_bf()/profit0_bf()-1})
-    
-    ## 2. Approval rate increase scenario (keep bad rate)
     
     b2_bf <- reactive({b0_bf()})
     phi2_bf <- function(x){B()*(1-y1_bf(x))/((1-B())*(1-x)+B()*(1-y1_bf(x)))-b2_bf()}
@@ -385,13 +425,13 @@ server <- function(input, output) {
     b2_change_bf <- reactive({b2_bf()/b0_bf()-1})
     profit2_change_bf <- reactive({profit2_bf()/profit0_bf()-1})
     
-    ## 3. Profit increase scenario (keep marginal bad rate)
     
     phi3_bf <- function(x){numDeriv::grad(y1_bf, x)-deriv0_bf()}
     x3_bf <- reactive({as.numeric(uniroot(phi3_bf,lower=0+1/1000,upper=1-1/1000,tol = .Machine$double.eps)[1])})
     a3_bf <- reactive({((1-B())*(1-x3_bf())+B()*(1-y1_bf(x3_bf())))})
     b3_bf <- reactive({B()*(1-y1_bf(x3_bf()))/a3_bf()})
-
+    
+    
     deriv3_bf <- reactive({numDeriv::grad(y1_bf, x3_bf())})
     mbr3_bf <- reactive({(1+(1-B())/B()/deriv3_bf())^(-1)})
     ir3_bf <- reactive({ir0_bf()})
@@ -401,16 +441,28 @@ server <- function(input, output) {
     a3_change_bf <- reactive({a3_bf()/a0()-1})
     b3_change_bf <- reactive({b3_bf()/b0_bf()-1})
     profit3_change_bf <- reactive({profit3_bf()/profit0_bf()-1})
-    
     ########
-    # BINORMAL
-    ########
-    
+    # BI NORMAL
     y0_bn<-function(x){FuncBiNormal(x,GINI1(), shape1())}
     y1_bn<-function(x){FuncBiNormal(x,GINI2(), ifelse(sameshape(), shape1(), shape2()))}
     
+    # phi1_bn<-function(x){(1-B())*(1-x)+B()*(1-y0_bn(x))-a0()}
+    # x0_bn<-reactive({as.numeric(uniroot(phi1_bn,lower=0,upper=1,tol = .Machine$double.eps))[1]})
+    # 
+    # phi2_bn<-function(x){(1-B())*(1-x)+B()*(1-y1_bn(x))-a0()}
+    # x1_bn<-reactive({as.numeric(uniroot(phi2_bn,lower=0,upper=1,tol = .Machine$double.eps))[1]})
+    # 
+    # b0_bn <- reactive({B()*(1-y0_bn(x0_bn()))/a0()})
+    # b1_bn <- reactive({B()*(1-y1_bn(x1_bn()))/a0()})
+    # 
+    # phi3_bn<-function(x){B()*(1-y1_bn(x))/((1-B())*(1-x)+B()*(1-y1_bn(x)))-b0_bn()}
+    # x1prime_bn <- reactive({as.numeric(uniroot(phi3_bn,lower=0,upper=.99999999999,tol = .Machine$double.eps))[1]})
+    # a1_bn <- reactive({((1-B())*(1-x1prime_bn())+B()*(1-y1_bn(x1prime_bn())))})
+    # 
+    # phi_yn_x3_bn<-function(x){numDeriv::grad(y1, x)-deriv0()}
+    # x3_bn <- reactive({as.numeric(uniroot(phi_yn_x3_bn,lower=0+1/1000,upper=1-1/1000,tol = .Machine$double.eps))[1]})
+    # a3_bn <- reactive({((1-B())*(1-x3())+B()*(1-y1(x3())))})
     ######## bn
-
     phi0_bn <- function(x){(1-B())*(1-x)+B()*(1-y0_bn(x))-a0()}
     x0_bn<-reactive({as.numeric(uniroot(phi0_bn,lower=0,upper=1,tol = .Machine$double.eps)[1])})
     b0_bn <- reactive({B()*(1-y0_bn(x0_bn()))/a0()})
@@ -421,7 +473,6 @@ server <- function(input, output) {
     profit0_bn <- reactive({a0()*(ir0_bn()*(1-b0_bn())-b0_bn())})
     ginip0_bn <- reactive({GiniP(y0_bn,x0_bn())})
     
-    ## 1. Bad rate reduction scenario (keep approval)
     
     a1_bn <- reactive({a0()})
     phi1_bn<-function(x){(1-B())*(1-x)+B()*(1-y1_bn(x))-a1_bn()}
@@ -436,8 +487,6 @@ server <- function(input, output) {
     a1_change_bn <- reactive({a1_bn()/a0()-1})
     b1_change_bn <- reactive({b1_bn()/b0_bn()-1})
     profit1_change_bn <- reactive({profit1_bn()/profit0_bn()-1})
-
-    ## 2. Approval rate increase scenario (keep bad rate)
     
     b2_bn <- reactive({b0_bn()})
     phi2_bn <- function(x){B()*(1-y1_bn(x))/((1-B())*(1-x)+B()*(1-y1_bn(x)))-b2_bn()}
@@ -454,12 +503,12 @@ server <- function(input, output) {
     b2_change_bn <- reactive({b2_bn()/b0_bn()-1})
     profit2_change_bn <- reactive({profit2_bn()/profit0_bn()-1})
     
-    ## 3. Profit increase scenario (keep marginal bad rate)
-
+    
     phi3_bn <- function(x){numDeriv::grad(y1_bn, x)-deriv0_bn()}
     x3_bn <- reactive({as.numeric(uniroot(phi3_bn,lower=0+1/1000,upper=1-1/1000,tol = .Machine$double.eps)[1])})
     a3_bn <- reactive({((1-B())*(1-x3_bn())+B()*(1-y1_bn(x3_bn())))})
     b3_bn <- reactive({B()*(1-y1_bn(x3_bn()))/a3_bn()})
+    
     
     deriv3_bn <- reactive({numDeriv::grad(y1_bn, x3_bn())})
     mbr3_bn <- reactive({(1+(1-B())/B()/deriv3_bn())^(-1)})
@@ -470,7 +519,6 @@ server <- function(input, output) {
     a3_change_bn <- reactive({a3_bn()/a0()-1})
     b3_change_bn <- reactive({b3_bn()/b0_bn()-1})
     profit3_change_bn <- reactive({profit3_bn()/profit0_bn()-1})
-
     ########
     
     output$curvePlot <- renderPlot({
@@ -537,7 +585,13 @@ server <- function(input, output) {
                 size=5,
                 min.segment.length = 0,
                 hjust = 1, vjust = -1, show.legend = FALSE)
+            # geom_text_repel(x=xcord[2], y=ycord[2], label = paste("[1] Bad rate change:\n", round(100*b1_change, 3), "%", sep = ""), hjust = 1, vjust = -1, aes(size = 2), show.legend = FALSE ) +
+            # geom_text(x=xcord[3], y=ycord[3], label = paste("[2] Approval change:\n", round(100*a2_change, 3), "%", sep = ""), hjust = 1, vjust = -1, aes(size = 2), show.legend = FALSE ) +
+            # geom_text(x=xcord[4], y=ycord[4], label = paste("[3] Profit change:\n", round(100*profit3_change, 3), "%", sep = ""), hjust = 1, vjust = -1, aes(size = 2), show.legend = FALSE )
+        # # code responsible for the square shape of the plot
     }
+    # ,height=reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*2/5,0))
+    
     )
     
     
@@ -676,7 +730,25 @@ server <- function(input, output) {
     )
     
     output$text1 <- renderText({
-        # additional output
+
+        # a1_change <- 100*a1_change()
+        # a2_change <- 100*a2_change()
+        # a3_change <- 100*a3_change()
+        # b1_change <- 100*b1_change() 
+        # b2_change <- 100*b2_change()
+        # b3_change <- 100*b3_change()
+        # profit1_change <- 100*profit1_change()
+        # profit2_change <- 100*profit2_change()
+        # profit3_change <- 100*profit3_change()
+        # 
+        # HTML(paste("<h3>With the new scoring you can achieve a bad rate reduction of:</h3><br/><h4><b>", paste(round((b1/b0-1)*100,4), " %", sep=''), "</b></h4></br>"),
+        #      paste("<h3>... or approval rate improvement of:</h3><br/><h4><b>", paste(round((a1/a0()-1)*100,4), " %", sep=''), "</b><h4></br>"),
+        #      paste("<h3>Portfolio bad rate with scoring 1:</h3><br/><h4><b>", paste(round(b0*100,4), " %", sep=''), "</b><h4></br>"),
+        #      paste("<h3>Portfolio bad rate with scoring 2:</h3><br/><h4><b>", paste(round(b1*100,4), " %", sep=''), "</b><h4></br>"),
+        #      paste("<h3>Approval rate with scoring 2:</h3><br/><h4><b>", paste(round(a1*100,4)," %", sep=''), "</b><h4></br>"),
+        # 
+        # 
+        # )
     })
 }
 
