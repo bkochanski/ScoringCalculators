@@ -1,12 +1,16 @@
-GINI1<-.8
-GINI2<-.6
-B<-.1
-a0<-.5
+#GINI1<-.8
+#GINI2<-.6
+#B<-.1
+#a0<-.5
 
+# ROC curve model
 FuncMidNormal<-function(x,g){pnorm(qnorm((g+1)/2)*sqrt(2)+qnorm(x))}
 #FuncMidFractal<-function(x,g){0.5*(1-(1-x)^((1+g)/(1-g)))+0.5*x^((1-g)/(1+g))}
+
+#Gini of f ROC curve above cutoff x calculation
 GiniP<-function(f, x){2*(integrate(f,x,1)$value-(1-x)*f(x))/((1-x)*(1-f(x)))-1}
  
+#approval increase calculation
 a3_in<-function(GINI1, GINI2, B, a0)
 { tryCatch({
 y0<-function(x){FuncMidNormal(x,GINI1)}
@@ -39,6 +43,7 @@ profit3 <- a3*(ir0*(1-b3)-b3)
 a3/a0-1}, error=function(err) NA)
 }
 
+#do not show scientific notation
 options(scipen=99)
 
 a3_inaVV<-Vectorize(function(y){
@@ -51,12 +56,18 @@ m<-a3_inaVV(1:60/100)
 m.df <- reshape2::melt(m, c("x", "y"), value.name = "z")
 
 library(ggplot2)
-ggplot(m.df, aes(x = x, y = y, z = z)) +
-  stat_contour(aes(colour = ..level..)) +geom_contour_filled() + 
-  xlab("initial approval [%]") +
-  ylab("population bad rate [%]")
+ggplot(m.df, aes(x = x, y = y, z = z*100)) +
+  geom_contour_filled() +
+  geom_contour(breaks=c(0), colour='black', lwd=1) +
+#  stat_contour(aes(colour = ..level..)) +
+  xlab("initial approval rate [%]") +
+  ylab("population bad rate [%]") +
+  guides(fill=guide_legend(title="approval rate\nchange [%]"))
+
+summary(lm(z~x*y, data=m.df))
 
 # xlab('Gini 2') + ylab('Correlation') 
 
 # m.df[m.df$x==75 & m.df$y==50,]
 # m.df[m.df$x==50 & m.df$y==75,]
+
