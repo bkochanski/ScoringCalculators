@@ -546,7 +546,7 @@ server <- function(input, output) {
             scale_colour_manual("ROC Curve", values = c("dodgerblue2", "olivedrab"), breaks = waiver(), labels=c("Scorecard 1", "Scorecard 2")) +
             geom_point(data = df[1,], aes(xcord, ycord, shape = factor(point_id)),  colour = "black", fill = "dodgerblue2", size = 4, stroke = 1.5) +
             geom_point(data = df[c(2,3, 4),], aes(xcord, ycord, shape = factor(point_id)), colour = "black", fill = "olivedrab", size = 4, stroke = 1.5) +
-            scale_shape_manual("Point",
+            scale_shape_manual("Cut-off\npoint",
                                values = c('a' = 21, 'b' = 22, 'c' = 24, 'd' = 23),
                                labels = c("Currently", "[1] Bad rate reduction\n scenario (keep approval)", "[2] Approval rate\n improvement scenario\n (keep bad rate)", "[3] Profit increase\n scenario (keep marginal\n bad rate)")) +
             xlab("cumulative good proportion") + ylab("cumulative bad proportion") + ggtitle("") + 
@@ -635,7 +635,7 @@ server <- function(input, output) {
           data.frame(scenario=1:3, 
                      existing_approval = rep(fperc(a0()),3), 
                      new_approval = c(fperc(a1_mf()), fperc(a2_mf()), fperc(a3_mf())),
-                     existing_bad_rate = rep(fperc(b0()),3),
+                     existing_bad_rate = rep(fperc(b0_mf()),3),
                      new_bad_rate = c(fperc(b1_mf()), fperc(b2_mf()), fperc(b3_mf())),
                      existing_profit = rep(f3(profit0_mf()), 3),
                      new_profit = c(f3(profit1_mf()), f3(profit2_mf()), f3(profit3_mf()))
@@ -647,7 +647,7 @@ server <- function(input, output) {
         data.frame(scenario=1:3, 
                      existing_approval = rep(fperc(a0()),3), 
                      new_approval = c(fperc(a1_bf()), fperc(a2_bf()), fperc(a3_bf())),
-                     existing_bad_rate = rep(fperc(b0()),3),
+                     existing_bad_rate = rep(fperc(b0_bf()),3),
                      new_bad_rate = c(fperc(b1_bf()), fperc(b2_bf()), fperc(b3_bf())),
                      existing_profit = rep(f3(profit0_bf()), 3),
                      new_profit = c(f3(profit1_bf()), f3(profit2_bf()), f3(profit3_bf()))
@@ -659,7 +659,7 @@ server <- function(input, output) {
         data.frame(scenario=1:3, 
                    existing_approval = rep(fperc(a0()),3), 
                    new_approval = c(fperc(a1_bn()), fperc(a2_bn()), fperc(a3_bn())),
-                   existing_bad_rate = rep(fperc(b0()),3),
+                   existing_bad_rate = rep(fperc(b0_bn()),3),
                    new_bad_rate = c(fperc(b1_bn()), fperc(b2_bn()), fperc(b3_bn())),
                    existing_profit = rep(f3(profit0_bn()), 3),
                    new_profit = c(f3(profit1_bn()), f3(profit2_bn()), f3(profit3_bn()))
