@@ -137,6 +137,9 @@ FuncMidFractal<-function(x,g){0.5*(1-(1-x)^((1+g)/(1-g)))+0.5*x^((1-g)/(1+g))}
 FuncBiFractal<-function(x,g, beta){beta*(1-(1-x)^((1+g)/(1-g)))+(1-beta)*x^((1-g)/(1+g))}
 FuncBiNormal<-function(x,g,shape){pnorm(qnorm((g+1)/2)*sqrt(1+shape^2)+shape*qnorm(x))}
 
+# Gini above the cutoff (truncated Gini) calculation
+# f - ROC curve model (e.g. binormal with set Gini & shape parameters)
+# x - cut-off point representation on the ROC curve (x coordinate: cumulative good proportion below the cutoff)
 GiniP<-function(f, x){2*(integrate(f,x,1)$value-(1-x)*f(x))/((1-x)*(1-f(x)))-1}
 
 server <- function(input, output) {

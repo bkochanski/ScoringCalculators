@@ -5,7 +5,7 @@ account: blakocha
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4531106
-bundleId: 7557932
+bundleId: 7637839
 url: https://blakocha.shinyapps.io/BetterGiniCalc/
 asMultiple: FALSE
 asStatic: FALSE
