@@ -50,6 +50,9 @@ sd(simdf$latent)
 mean(simdf$latentunif<.1)
 simdf$bad<-1*(simdf$latentunif<.1)
 
+simdf$s1n<-qnorm(simdf$s1)
+simdf$s2n<-qnorm(simdf$s2)
+
 my_gini_roc<-function(resp, pred){
   #c<-pred[order(pred)]
   d<-resp[order(pred)]
@@ -63,24 +66,26 @@ my_gini<-function(resp, pred){
 
 
 my_gini_roc(simdf$bad, simdf$s1)
-#my_gini(simdf$bad, simdf$s1)
+my_gini_roc(simdf$bad, simdf$s1n)
 my_gini_roc(simdf$bad, simdf$s2)
+my_gini_roc(simdf$bad, simdf$s2n)
 cor(simdf$s1, simdf$s2)
+cor(simdf$s1n, simdf$s2n)
 
 # Two ROC curves...
-d1<-simdf$bad[order(simdf$s1)]
+d1<-simdf$bad[order(simdf$s1n)]
 bc1<-c(0, cumsum(d1)/sum(d1))
 gc1<-c(0, cumsum(1-d1)/sum(1-d1))
 plot(gc1, bc1, type='l')
-d2<-simdf$bad[order(simdf$s2)]
+d2<-simdf$bad[order(simdf$s2n)]
 bc2<-c(0, cumsum(d2)/sum(d2))
 gc2<-c(0, cumsum(1-d2)/sum(1-d2))
 lines(gc2, bc2, col='blue')
 
 
 
-my_gini_roc(simdf$bad, simdf$s1+simdf$s2)
-w1=0.335797663146443
+my_gini_roc(simdf$bad, simdf$s1n+simdf$s2n)
+w1=0.3424
 my_gini_roc(simdf$bad, w1*simdf$s1+(1-w1)*simdf$s2)
 
 gini_from_r<-function(rho=.5, defrate=.1){
@@ -114,9 +119,9 @@ gini_combine_calculator(0.5008577,
                         0.5560054,
                         0.1017)
 
-gini_combine_calculator(my_gini_roc(simdf$bad, simdf$s1), 
-                        my_gini_roc(simdf$bad, simdf$s2),
-                        cor(simdf$s1, simdf$s2),
+gini_combine_calculator(my_gini_roc(simdf$bad, simdf$s1n), 
+                        my_gini_roc(simdf$bad, simdf$s2n),
+                        cor(simdf$s1n, simdf$s2n),
                         mean(simdf$bad))
 
 
@@ -125,4 +130,3 @@ gini_profile<-Vectorize(function(w){my_gini_roc(simdf$bad, w*simdf$s1+(1-w)*simd
 gp<-gini_profile(20:40/100)
 plot(20:40/100, gp)
 
-simdf
