@@ -31,6 +31,7 @@ gini_combine_calculator<-function(g1, g2, corr, defaultrate){
 
 
 data<-readxl::read_excel('C:/Users/blaze/Downloads/data.xlsx')
+data<-readxl::read_excel('/Users/blakocha/Downloads/data.xlsx')
 
 gini_from_auc<-function(x){(x-.5)*2}
 gini_from_auc<-Vectorize(gini_from_auc)
