@@ -49,6 +49,14 @@ bc3<-c(0, cumsum(d3)/sum(d3))
 gc3<-c(0, cumsum(1-d3)/sum(1-d3))
 lines(gc3, bc3, col='red')
 
+ggplot(data = data.frame(gc1, bc1, gc2, bc2, gc3, bc3, gc4, bc4)) +
+  stat_function(fun = approxfun(gc1, bc1), linetype=2) +
+  stat_function(fun = approxfun(gc2, bc2), linetype=6) +
+  stat_function(fun = approxfun(gc3, bc3), linetype=1) +
+  stat_function(fun = approxfun(gc4, bc4), linetype=3) +
+  theme_bw() +
+  xlab("") + ylab("")
+
 linmodel<-glm(bad~s1n+s2n, data=train)
 linmodel$coefficients[2]/(linmodel$coefficients[2]+linmodel$coefficients[3])
 pred_l<-predict(linmodel, newdata=test)

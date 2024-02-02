@@ -32,7 +32,7 @@ RVM <- RVineMatrix(Matrix = Matrix, family = family,
 
 # simulate a sample of size 300 from the R-vine copula model
 #set.seed(123)
-sizesim<-100000
+sizesim<-1000000
 simdata <- RVineSim(sizesim, RVM)
 #psych::pairs.panels(simdata)
 
@@ -58,18 +58,18 @@ my_gini_roc<-function(resp, pred){
   d<-resp[order(pred)]
   bc<-c(0, cumsum(d)/sum(d))
   gc<-c(0, cumsum(1-d)/sum(1-d))
-  plot(gc, bc)
+#  plot(gc, bc)
   sum((gc[2:(length(gc))]-gc[1:(length(gc)-1)])*(bc[2:(length(bc))]+bc[1:(length(bc)-1)]))-1} 
 
 my_gini<-function(resp, pred){
   abs(2*bigstatsr::AUC(pred, resp)-1)}
 
 
-my_gini_roc(simdf$bad, simdf$s1)
+#my_gini_roc(simdf$bad, simdf$s1)
 my_gini_roc(simdf$bad, simdf$s1n)
-my_gini_roc(simdf$bad, simdf$s2)
+#my_gini_roc(simdf$bad, simdf$s2)
 my_gini_roc(simdf$bad, simdf$s2n)
-cor(simdf$s1, simdf$s2)
+#cor(simdf$s1, simdf$s2)
 cor(simdf$s1n, simdf$s2n)
 
 # Two ROC curves...

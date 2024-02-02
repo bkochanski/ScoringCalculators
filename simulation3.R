@@ -246,12 +246,12 @@ dim(res10000)
 dim(res1000)
 
 summary_table<-data.frame(n = c(1e3, 1e4, 1e5), 
-                          mnv_log_m = c(mean(res1000$gini_logistic-res1000$gini_model, na.rm=TRUE),
-                                       mean(res10000$gini_logistic-res10000$gini_model, na.rm=TRUE),
-                                       mean(res100000$gini_logistic-res100000$gini_model, na.rm=TRUE)),
-                          mnv_log_sd = c(sd(res1000$gini_logistic-res1000$gini_model, na.rm=TRUE),
-                                        sd(res10000$gini_logistic-res10000$gini_model, na.rm=TRUE),
-                                        sd(res100000$gini_logistic-res100000$gini_model, na.rm=TRUE)),
+                          mnv_log_m = c(mean(res1000$gini_model-res1000$gini_logistic, na.rm=TRUE),
+                                       mean(res10000$gini_model-res10000$gini_logistic, na.rm=TRUE),
+                                       mean(res100000$gini_model-res100000$gini_logistic, na.rm=TRUE)),
+                          mnv_log_sd = c(sd(res1000$gini_model-res1000$gini_logistic, na.rm=TRUE),
+                                        sd(res10000$gini_model-res10000$gini_logistic, na.rm=TRUE),
+                                        sd(res100000$gini_model-res100000$gini_logistic, na.rm=TRUE)),
                           log_the_m = c(mean(res1000$gini_logistic-res1000$theor_gini_combined, na.rm=TRUE),
                                        mean(res10000$gini_logistic-res10000$theor_gini_combined, na.rm=TRUE),
                                        mean(res100000$gini_logistic-res100000$theor_gini_combined, na.rm=TRUE)),
@@ -265,8 +265,13 @@ summary_table<-data.frame(n = c(1e3, 1e4, 1e5),
                                          sd(res10000$gini_model-res10000$theor_gini_combined, na.rm=TRUE),
                                          sd(res100000$gini_model-res100000$theor_gini_combined, na.rm=TRUE)),
                           gini_cf_se = c(
-                            mean(gini_conf_width(auc_from_gini(res1000$gini_logistic), res1000$actual_bad_rate, 1000), na.rm=TRUE)/(2*1.96),
-                            mean(gini_conf_width(auc_from_gini(res10000$gini_logistic), res10000$actual_bad_rate, 10000), na.rm=TRUE)/(2*1.96),
-                            mean(gini_conf_width(auc_from_gini(res100000$gini_logistic), res100000$actual_bad_rate, 100000), na.rm=TRUE)/(2*1.96)
+                            mean(gini_conf_width(auc_from_gini(res1000$gini_logistic), res1000$actual_bad_rate, 1000), na.rm=TRUE)/(2* qnorm(.975)),
+                            mean(gini_conf_width(auc_from_gini(res10000$gini_logistic), res10000$actual_bad_rate, 10000), na.rm=TRUE)/(2* qnorm(.975)),
+                            mean(gini_conf_width(auc_from_gini(res100000$gini_logistic), res100000$actual_bad_rate, 100000), na.rm=TRUE)/(2* qnorm(.975))
                           ))
+options(scipen=999)
 View(summary_table)
+
+library(knitr)
+kable(summary_table)
+print(summary_table)
