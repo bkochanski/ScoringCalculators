@@ -70,17 +70,34 @@ ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Ra
 
 
 library(ggplot2)
-library(ggrepel)
 ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Rate*100, '%\ncorr=', r_Bureau_Psych))) +
-  geom_point(aes(x=Gini_Bureau), col='darkgreen', shape=5, size=2) +
+  geom_point(aes(x=Gini_Bureau), col='darkgreen', shape=5, size=3) +
   geom_text(aes(x=Gini_Bureau, label=paste('Bureau:', Gini_Bureau)), hjust=0, vjust=1.5, col='darkgreen', angle = -20) +
-  geom_point(aes(x=Gini_Psych), col='darkcyan', shape=9, size=2)+
+  geom_point(aes(x=Gini_Psych), col='darkcyan', shape=9, size=3)+
   geom_text(aes(x=Gini_Psych, label=paste('Psych:', Gini_Psych)), hjust=0, vjust=-1, col='darkcyan', angle = 20) +
-  geom_point(aes(x=Gini_Combined), col='black', shape=2, size=2)+
+  geom_point(aes(x=Gini_Combined), col='black', shape=2, size=3)+
   geom_text(aes(x=Gini_Combined, label=paste('Log. reg.:', Gini_Combined)), hjust=0, vjust=-1, angle = 20) +
-  geom_point(aes(x=Gini_Predict_r), col='blue', shape=17, size=2)+
+  geom_point(aes(x=Gini_Predict_r), col='blue', shape=17, size=3)+
   geom_errorbar(aes(xmin = Gini_predict_r_lwr, xmax = Gini_predict_r_upr), col='blue', linetype=5, width=.1)+
   geom_text(aes(x=Gini_Predict_r, label=paste('MVN calc.:', round(Gini_Predict_r,3))), hjust=0, vjust=1.5, col='blue', angle=-20) +
+  #  geom_point(aes(x=Gini_Predict_rho), col='dark blue')+
+  #  geom_text(aes(x=Gini_Predict_rho, label=paste('Predicted (rho):', round(Gini_Predict_rho,3))), hjust=0, vjust=1.5, col='dark blue') +
+  scale_y_discrete(limits=rev)+
+  xlab('')+ylab('')+xlim(c(0.2, .75)) +
+  theme_bw()
+
+
+library(ggplot2)
+ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Rate*100, '%\ncorr=', r_Bureau_Psych))) +
+  geom_point(aes(x=Gini_Bureau), col='gray28', shape=5, size=3) +
+  geom_text(aes(x=Gini_Bureau, label=paste('Bureau:', Gini_Bureau)), hjust=0, vjust=1.5, col='gray28', angle = -20) +
+  geom_point(aes(x=Gini_Psych), col='gray28', shape=9, size=3)+
+  geom_text(aes(x=Gini_Psych, label=paste('Psych:', Gini_Psych)), hjust=0, vjust=-1, col='gray28', angle = 20) +
+  geom_point(aes(x=Gini_Combined), col='black', shape=2, size=3)+
+  geom_text(aes(x=Gini_Combined, label=paste('Log. reg.:', Gini_Combined)), hjust=0, vjust=-1, angle = 20) +
+  geom_point(aes(x=Gini_Predict_r), col='black', shape=17, size=3)+
+  geom_errorbar(aes(xmin = Gini_predict_r_lwr, xmax = Gini_predict_r_upr), col='black', linetype=5, width=.1)+
+  geom_text(aes(x=Gini_Predict_r, label=paste('MVN calc.:', round(Gini_Predict_r,3))), hjust=0, vjust=1.5, col='black', angle=-20) +
   #  geom_point(aes(x=Gini_Predict_rho), col='dark blue')+
   #  geom_text(aes(x=Gini_Predict_rho, label=paste('Predicted (rho):', round(Gini_Predict_rho,3))), hjust=0, vjust=1.5, col='dark blue') +
   scale_y_discrete(limits=rev)+
