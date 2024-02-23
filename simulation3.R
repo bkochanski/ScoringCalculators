@@ -178,14 +178,14 @@ write.csv(results, paste0('simresults', sample_size, format(Sys.time(), "%Y%m%d%
 sd(diff.logistic, na.rm=TRUE)
 sd(diff.probit, na.rm=TRUE)
 
-#res40000<-read.csv("ScoringCalculators/simresults4000020220428233229.csv")
-#res10000<-read.csv("ScoringCalculators/simresults1000020220428223014.csv")
-#res1000<-read.csv("ScoringCalculators/simresults100020220428212247.csv")
-#res100000<-read.csv("ScoringCalculators/simresults10000020220429000403.csv")
-res40000<-read.csv("simresults4000020220428233229.csv")
-res10000<-read.csv("simresults1000020220428223014.csv")
-res1000<-read.csv("simresults100020220428212247.csv")
-res100000<-read.csv("simresults10000020220429000403.csv")
+res40000<-read.csv("ScoringCalculators/simresults4000020220428233229.csv")
+res10000<-read.csv("ScoringCalculators/simresults1000020220428223014.csv")
+res1000<-read.csv("ScoringCalculators/simresults100020220428212247.csv")
+res100000<-read.csv("ScoringCalculators/simresults10000020220429000403.csv")
+# res40000<-read.csv("simresults4000020220428233229.csv")
+# res10000<-read.csv("simresults1000020220428223014.csv")
+# res1000<-read.csv("simresults100020220428212247.csv")
+# res100000<-read.csv("simresults10000020220429000403.csv")
 
 
 hist(res1000$diff.logistic, freq=FALSE, ylim=c(0,600), breaks=(-35:35)/1000)
