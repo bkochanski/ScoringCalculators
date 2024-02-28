@@ -1,9 +1,8 @@
 source('Gini_combined_master.R')
 
-
-#data<-readxl::read_excel('C:/Users/blaze/Downloads/data.xlsx')
+data<-readxl::read_excel('C:/Users/blaze/Downloads/data.xlsx')
 #data<-readxl::read_excel('C:/Users/Błażej/Downloads/data.xlsx')
-data<-readxl::read_excel('/Users/blakocha/Downloads/data.xlsx')
+#data<-readxl::read_excel('/Users/blakocha/Downloads/data.xlsx')
 
 data$Region <- c("Mexico", "Brazil", "Ukraine", "Ecuador")
 
@@ -39,8 +38,11 @@ AUC_upr<-Vectorize(AUC_upr)
 data$AUC_predict_r_lwr<-AUC_lwr(data$AUC_predict_r, data$Bad_Rate, data$N)
 data$AUC_predict_r_upr<-AUC_upr(data$AUC_predict_r, data$Bad_Rate, data$N)
 
-data$Gini_predict_r_lwr<-gini_from_auc(data$AUC_predict_r_lwr)
-data$Gini_predict_r_upr<-gini_from_auc(data$AUC_predict_r_upr)
+data$Gini_predict_r_lwrc<-gini_from_auc(data$AUC_predict_r_lwr)
+data$Gini_predict_r_uprc<-gini_from_auc(data$AUC_predict_r_upr)
+
+data$Gini_predict_r_lwr <- data$Gini_Predict_r - (data$Gini_Predict_r - data$Gini_predict_r_lwrc)/1.96
+data$Gini_predict_r_upr <- data$Gini_Predict_r + (data$Gini_Predict_r - data$Gini_predict_r_lwrc)/1.96
 
 #presize::prec_auc(auc_from_gini(.376), .1677, 1306)$lwr
 
@@ -66,7 +68,7 @@ ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Ra
   #  geom_text(aes(x=Gini_Predict_rho, label=paste('Predicted (rho):', round(Gini_Predict_rho,3))), hjust=0, vjust=1.5, col='dark blue') +
   scale_y_discrete(limits=rev)+
   xlab('')+ylab('')+xlim(c(0.2, .75)) +
-  theme_bw()
+  theme_bw() + theme(axis.text.y = element_text(size = 13))+ theme(axis.text.x = element_text(size = 13))  
 
 
 library(ggplot2)
@@ -86,6 +88,24 @@ ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Ra
   xlab('')+ylab('')+xlim(c(0.2, .75)) +
   theme_bw()
 
+library(ggplot2)
+ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Rate*100, '%\ncorr=', r_Bureau_Psych))) +
+  geom_point(aes(x=Gini_Bureau), col='gray28', shape=5, size=3) +
+  geom_text(aes(x=Gini_Bureau, label=paste('Bureau:', Gini_Bureau)), hjust=0.5, vjust=1.5, col='gray28', angle = 0) +
+  geom_point(aes(x=Gini_Psych), col='gray28', shape=9, size=3)+
+  geom_text(aes(x=Gini_Psych, label=paste('Psych:', Gini_Psych)), hjust=0.5, vjust=-1, col='gray28', angle = 0) +
+  geom_point(aes(x=Gini_Combined), col='black', shape=2, size=3)+
+  geom_text(aes(x=Gini_Combined, label=paste('Log. reg.:', Gini_Combined)), hjust=0.5, vjust=-1, angle = 0) +
+  geom_point(aes(x=Gini_Predict_r), col='black', shape=17, size=3)+
+  geom_errorbar(aes(xmin = Gini_predict_r_lwr, xmax = Gini_predict_r_upr), col='black', linetype=5, width=.1)+
+  geom_text(aes(x=Gini_Predict_r, label=paste('MVN calc.:', round(Gini_Predict_r,3))), hjust=0, vjust=1.5, col='black', angle=0) +
+  #  geom_point(aes(x=Gini_Predict_rho), col='dark blue')+
+  #  geom_text(aes(x=Gini_Predict_rho, label=paste('Predicted (rho):', round(Gini_Predict_rho,3))), hjust=0, vjust=1.5, col='dark blue') +
+  scale_y_discrete(limits=rev)+
+  xlab('')+ylab('')+xlim(c(0.2, .75)) +
+  theme_bw() + theme(text = element_text(size = 15))
+
+
 
 library(ggplot2)
 ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Rate*100, '%\ncorr=', r_Bureau_Psych))) +
@@ -102,4 +122,7 @@ ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Ra
   #  geom_text(aes(x=Gini_Predict_rho, label=paste('Predicted (rho):', round(Gini_Predict_rho,3))), hjust=0, vjust=1.5, col='dark blue') +
   scale_y_discrete(limits=rev)+
   xlab('')+ylab('')+xlim(c(0.2, .75)) +
-  theme_bw()
+  theme_bw() + theme(text = element_text(size = 15))
+
+
+

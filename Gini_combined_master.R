@@ -43,8 +43,8 @@ gini_combine_calculator <- function(g1, g2, corr, defaultrate) {
             tol = .Machine$double.eps)$root
   
   (a_opt <- (corr * rho_s2 - rho_s1) / (corr * rho_s1 - rho_s2))
-  corr_opt <- (a_opt * rho_s1 + rho_s2) / sqrt(a_opt ^ 2 + 2 * a_opt * corr +
-                                                 1)
+  corr_opt <- (a_opt * rho_s1 + rho_s2) / 
+    sqrt(a_opt ^ 2 + 2 * a_opt * corr +  1)
   g_result0 <- if (abs(corr_opt) > 1) {
     NaN
   } else {
