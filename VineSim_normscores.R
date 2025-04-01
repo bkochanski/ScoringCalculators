@@ -24,6 +24,7 @@ library(VineCopula)
 RVM <- RVineMatrix(Matrix = Matrix, family = family,
                    par = par, par2 = par2,
                    names = c("V1", "V2", "V3"))
+#RVM
 
 # plot(RVM,1)
 # plot(RVM,2)
