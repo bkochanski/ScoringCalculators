@@ -4,6 +4,8 @@ Matrix <- c(3, 2, 1,
             0, 0, 1)
 Matrix <- matrix(Matrix, 3, 3)
 # define R-vine pair-copula family matrix
+# https://tnagler.github.io/VineCopula/reference/BiCopSelect.html
+# ?RVineMatrix
 family <- c(0, 1, 3,
             0, 0, 10,
             0, 0, 0)
