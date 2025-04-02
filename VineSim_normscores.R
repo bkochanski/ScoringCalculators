@@ -21,6 +21,9 @@ par2 <- c(0, 0, 0,
           0, 0, 0.88,
           0, 0, 0)
 par2 <- matrix(par2, 3, 3)
+
+
+
 # define RVineMatrix object
 library(VineCopula)
 RVM <- RVineMatrix(Matrix = Matrix, family = family,
@@ -35,15 +38,21 @@ RVM <- RVineMatrix(Matrix = Matrix, family = family,
 
 # simulate a sample of size 300 from the R-vine copula model
 #set.seed(123)
-sizesim<-1000000
+sizesim<-10000
 simdata <- RVineSim(sizesim, RVM)
 #psych::pairs.panels(simdata)
 
 cor(simdata)
+#cor(simdata, method="kendall")
+copula::rho(copula::claytonCopula(.7))
+copula::tau(VC2copula::BB8Copula(param=c(3.32, 0.88)))
+copula::tau(copula::claytonCopula(.7))
 
-# BiCopSelect(pobs(simdata[,1]), pobs(simdata[,2]), familyset = NA)
-# BiCopSelect(pobs(simdata[,1]), pobs(simdata[,3]), familyset = NA)
-# BiCopSelect(pobs(simdata[,2]), pobs(simdata[,3]), familyset = NA)
+
+
+# BiCopSelect(pobs(simdata[1:1000,1]), pobs(simdata[1:1000,2]), familyset = NA) #BB8 (3.32, 0.88)
+# BiCopSelect(pobs(simdata[1:2000,1]), pobs(simdata[1:2000,3]), familyset = NA) #Clayton (0.7)
+# BiCopSelect(pobs(simdata[1:1000,2]), pobs(simdata[1:1000,3]), familyset = NA) #Gaussian ?
 
 simdf<-data.frame(simdata)
 names(simdf)<-c("latentunif", "s1", "s2")
