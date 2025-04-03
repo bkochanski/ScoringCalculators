@@ -157,6 +157,7 @@ for (i in 1:number_of_sim){
     cpar <- rho2clayton(r2rho(sigma[1,3]))
     gpar <- rho2gumbel(r2rho(sigma[2,3]))
     npar <- predict(ncorf, newdata = data.frame(gpar, cpar, ncor = corrs))
+    npar <- min(max(npar, 0.01),0.99)
     Matrix <- c(3, 2, 1,
                 0, 2, 1,
                 0, 0, 1)
