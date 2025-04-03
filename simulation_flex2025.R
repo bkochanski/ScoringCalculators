@@ -228,69 +228,59 @@ results_1e5_Tn <- simul(125, 444, 1e5, "T4", "Normal")
 results_1e3_Tu <- simul(125, 444, 1e3, "T4", "Uniform")
 results_1e4_Tu <- simul(125, 444, 1e4, "T4", "Uniform")
 results_1e5_Tu <- simul(125, 444, 1e5, "T4", "Uniform")
-results_1e3_Ts <- simul(125, 444, 1e3, "Normal", "Skewed6")
-results_1e4_Ts <- simul(125, 444, 1e4, "Normal", "Skewed6")
-results_1e5_Ts <- simul(125, 444, 1e5, "Normal", "Skewed6")
+results_1e3_Ts <- simul(125, 444, 1e3, "T4", "Skewed6")
+results_1e4_Ts <- simul(125, 444, 1e4, "T4", "Skewed6")
+results_1e5_Ts <- simul(125, 444, 1e5, "T4", "Skewed6")
 
+library(dplyr)
 
+# Create a named list of data frames
+dfs <- list(
+  "Normal_Skewed6_1e3" = results_1e3_NS,
+  "Normal_Skewed6_1e4" = results_1e4_NS,
+  "Normal_Skewed6_1e5" = results_1e5_NS,
+  "Normal_Uniform_1e3" = results_1e3_Nu,
+  "Normal_Uniform_1e4" = results_1e4_Nu,
+  "Normal_Uniform_1e5" = results_1e5_Nu,
+  "Normal_Normal_1e3" = results_1e3_Nn,
+  "Normal_Normal_1e4" = results_1e4_Nn,
+  "Normal_Normal_1e5" = results_1e5_Nn,
+  "T4_Normal_1e3" = results_1e3_Tn,
+  "T4_Normal_1e4" = results_1e4_Tn,
+  "T4_Normal_1e5" = results_1e5_Tn,
+  "T4_Uniform_1e3" = results_1e3_Tu,
+  "T4_Uniform_1e4" = results_1e4_Tu,
+  "T4_Uniform_1e5" = results_1e5_Tu,
+  "T4_Skewed6_1e3" = results_1e3_Ts,
+  "T4_Skewed6_1e4" = results_1e4_Ts,
+  "T4_Skewed6_1e5" = results_1e5_Ts
+)
 
-res1000 <- read.csv("simresults_flex_Normal_Normal_1000_999_125_20250402213447.csv")
-res10000 <- read.csv("simresults_flex_Normal_Normal_10000_999_125_20250402220915.csv")
-res100000 <- read.csv("simresults_flex_Normal_Normal_100000_999_125_20250403010128.csv")  
-res10000 <-results
+# Stack all data frames and add a column for the source name
+stacked_results <- bind_rows(dfs, .id = "Simulation")
 
-
+# Print result
+head(stacked_results)
 
 gini_conf_width<-Vectorize(function(auc, brate, n){if(any(is.na(brate), is.na(auc))) {NA} else 2*{presize::prec_auc(auc, brate, n)$conf.width}})
 auc_from_gini<-Vectorize(function(x){x/2+.5})
-summary_table<-data.frame(n = c(1e3, 1e4, 1e5), 
-                            mnv_log_m = c(mean(res1000$gini_model-res1000$gini_logistic, na.rm=TRUE),
-                                          mean(res10000$gini_model-res10000$gini_logistic, na.rm=TRUE),
-                                          mean(res100000$gini_model-res100000$gini_logistic, na.rm=TRUE)),
-                            mnv_log_sd = c(sd(res1000$gini_model-res1000$gini_logistic, na.rm=TRUE),
-                                           sd(res10000$gini_model-res10000$gini_logistic, na.rm=TRUE),
-                                           sd(res100000$gini_model-res100000$gini_logistic, na.rm=TRUE)),
-                            log_the_m = c(mean(res1000$gini_logistic-res1000$theor_gini_combined, na.rm=TRUE),
-                                          mean(res10000$gini_logistic-res10000$theor_gini_combined, na.rm=TRUE),
-                                          mean(res100000$gini_logistic-res100000$theor_gini_combined, na.rm=TRUE)),
-                            log_the_sd = c(sd(res1000$gini_logistic-res1000$theor_gini_combined, na.rm=TRUE),
-                                           sd(res10000$gini_logistic-res10000$theor_gini_combined, na.rm=TRUE),
-                                           sd(res100000$gini_logistic-res100000$theor_gini_combined, na.rm=TRUE)),
-                            mnv_the_m = c(mean(res1000$gini_model-res1000$theor_gini_combined, na.rm=TRUE),
-                                          mean(res10000$gini_model-res10000$theor_gini_combined, na.rm=TRUE),
-                                          mean(res100000$gini_model-res100000$theor_gini_combined, na.rm=TRUE)),
-                            mnv_the_sd = c(sd(res1000$gini_model-res1000$theor_gini_combined, na.rm=TRUE),
-                                           sd(res10000$gini_model-res10000$theor_gini_combined, na.rm=TRUE),
-                                           sd(res100000$gini_model-res100000$theor_gini_combined, na.rm=TRUE)),
-                            mnvs_the_m = c(mean(res1000$gini_model_rho-res1000$theor_gini_combined, na.rm=TRUE),
-                                           mean(res10000$gini_model_rho-res10000$theor_gini_combined, na.rm=TRUE),
-                                           mean(res100000$gini_model_rho-res100000$theor_gini_combined, na.rm=TRUE)),
-                            mnvs_the_sd = c(sd(res1000$gini_model_rho-res1000$theor_gini_combined, na.rm=TRUE),
-                                            sd(res10000$gini_model_rho-res10000$theor_gini_combined, na.rm=TRUE),
-                                            sd(res100000$gini_model_rho-res100000$theor_gini_combined, na.rm=TRUE)),
-                            mnvs2_the_m = c(mean(res1000$gini_model_rho2-res1000$theor_gini_combined, na.rm=TRUE),
-                                            mean(res10000$gini_model_rho2-res10000$theor_gini_combined, na.rm=TRUE),
-                                            mean(res100000$gini_model_rho2-res100000$theor_gini_combined, na.rm=TRUE)),
-                            mnvs2_the_sd = c(sd(res1000$gini_model_rho2-res1000$theor_gini_combined, na.rm=TRUE),
-                                             sd(res10000$gini_model_rho2-res10000$theor_gini_combined, na.rm=TRUE),
-                                             sd(res100000$gini_model_rho2-res100000$theor_gini_combined, na.rm=TRUE)),
-                            mnvs2_logs_m = c(mean(res1000$gini_model_rho2-res1000$gini_logs, na.rm=TRUE),
-                                             mean(res10000$gini_model_rho2-res10000$gini_logs, na.rm=TRUE),
-                                             mean(res100000$gini_model_rho2-res100000$gini_logs, na.rm=TRUE)),
-                            mnvs2_logs_sd = c(sd(res1000$gini_model_rho2-res1000$gini_logs, na.rm=TRUE),
-                                             sd(res10000$gini_model_rho2-res10000$gini_logs, na.rm=TRUE),
-                                             sd(res100000$gini_model_rho2-res100000$gini_logs, na.rm=TRUE)),
-                          logs_the_m = c(mean(res1000$gini_logs-res1000$theor_gini_combined, na.rm=TRUE),
-                                          mean(res10000$gini_logs-res10000$theor_gini_combined, na.rm=TRUE),
-                                          mean(res100000$gini_logs-res100000$theor_gini_combined, na.rm=TRUE)),
-                          logs_the_sd = c(sd(res1000$gini_logs-res1000$theor_gini_combined, na.rm=TRUE),
-                                           sd(res10000$gini_logs-res10000$theor_gini_combined, na.rm=TRUE),
-                                           sd(res100000$gini_logs-res100000$theor_gini_combined, na.rm=TRUE)),
-                          gini_cf_se = c(
-                              mean(gini_conf_width(auc_from_gini(res1000$gini_logistic), res1000$actual_bad_rate, 1000), na.rm=TRUE)/(2* qnorm(.975)),
-                              mean(gini_conf_width(auc_from_gini(res10000$gini_logistic), res10000$actual_bad_rate, 10000), na.rm=TRUE)/(2* qnorm(.975)),
-                              mean(gini_conf_width(auc_from_gini(res100000$gini_logistic), res100000$actual_bad_rate, 100000), na.rm=TRUE)/(2* qnorm(.975))
-                            ))
-options(scipen=999)
-View(summary_table)
+
+stacked_results %>% group_by(Simulation) %>%
+  summarize(
+    m_mnv_log  = mean(gini_model-gini_logistic, na.rm=TRUE),
+    sd_mnv_log  = sd(gini_model-gini_logistic, na.rm=TRUE),
+    m_log_the  = mean(gini_logistic-theor_gini_combined, na.rm=TRUE),
+    sd_log_the  = sd(gini_logistic-theor_gini_combined, na.rm=TRUE),
+    m_mnv_the  = mean(gini_model-theor_gini_combined, na.rm=TRUE),
+    sd_mnv_the  = sd(gini_model-theor_gini_combined, na.rm=TRUE),
+    m_mnvs_the = mean(gini_model_rho-theor_gini_combined, na.rm=TRUE),
+    sd_mnvs_the = sd(gini_model_rho-theor_gini_combined, na.rm=TRUE),
+    m_mnvs2_the = mean(gini_model_rho2-theor_gini_combined, na.rm=TRUE),
+    sd_mnvs2_the = sd(gini_model_rho2-theor_gini_combined, na.rm=TRUE),
+    m_logs_the = mean(gini_logs-theor_gini_combined, na.rm=TRUE),
+    sd_logs_the = sd(gini_logs-theor_gini_combined, na.rm=TRUE),
+    m_mnvs2_logs = mean(gini_model_rho2-gini_logs, na.rm=TRUE),
+    sd_mnvs2_logs = sd(gini_model_rho2-gini_logs, na.rm=TRUE),
+    gini_se = mean(gini_conf_width(auc_from_gini(gini_logistic), actual_bad_rate, as.numeric(substring(Simulation, nchar(Simulation) - 2))), na.rm=TRUE)/(2* qnorm(.975))
+  )
 
