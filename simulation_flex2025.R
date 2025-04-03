@@ -51,6 +51,20 @@ gini_combine_1<-function(g1, g2, corr, defaultrate){
 
 gini_combine_1<-Vectorize(gini_combine_1)
 
+ncorf <- readRDS("ncorf.RDS")
+
+clayton2rho <- Vectorize(function(x){copula::rho(copula::claytonCopula(x))})
+#plot(0:1000/20, clayton2rho(0:1000/20))
+rho2clayton <- splinefun(clayton2rho(0:1000/20), 0:1000/20)
+
+gumbel2rho <- Vectorize(function(x){copula::rho(copula::gumbelCopula(x))})
+#plot(20:1000/20, gumbel2rho(20:1000/20))
+rho2gumbel <- splinefun(gumbel2rho(20:1000/20), 20:1000/20)
+
+rho2r <- function(rho){2*sin(rho*pi/6)}
+r2rho <- function(r){6/pi*asin(r/2)}
+
+
 ######## simul function #################
 
 simul <- function(inp_seed = 125, inp_nsim = 999, inp_sample_size= 1e4, 
@@ -139,7 +153,36 @@ for (i in 1:number_of_sim){
     z <- rCopula(sample_size, t_cop)
   }
   
+  if (mycop == "CGN") {
+    cpar <- rho2clayton(r2rho(sigma[1,3]))
+    gpar <- rho2gumbel(r2rho(sigma[2,3]))
+    npar <- predict(ncorf, newdata = data.frame(gpar, cpar, ncor = corrs))
+    Matrix <- c(3, 2, 1,
+                0, 2, 1,
+                0, 0, 1)
+    Matrix <- matrix(Matrix, 3, 3)
+    family <- c(0, 1, 3,
+                0, 0, 4,
+                0, 0, 0)
+    family <- matrix(family, 3, 3)
+    par <- c(0, npar, cpar,
+             0, 0, gpar,
+             0, 0, 0)
+    par <- matrix(par, 3, 3)
+    par2 <- c(0, 0, 0,
+              0, 0, 0,
+              0, 0, 0)
+    par2 <- matrix(par2, 3, 3)
+    library(VineCopula)
+    RVM <- RVineMatrix(Matrix = Matrix, family = family,
+                       par = par, par2 = par2,
+                       names = c("V1", "V2", "V3"))
+    simdata <- RVineSim(sample_size, RVM)
+    z <- simdata[,c(3, 1:2)]
+  }
   
+  
+    
   df<-z
   df[,3]<-(z[,3]<dfrate)*1
   df<-data.frame(df)
@@ -213,6 +256,9 @@ write.csv(results, paste0('simresults_flex', '_', mycop, '_', mymarginals, '_', 
 
 return(results)}
 
+results_1e3_CGNn <- simul(125, 444, 1e3, "CGN", "Normal")
+
+
 results_1e3_NS <- simul(125, 444, 1e3, "Normal", "Skewed6")
 results_1e4_NS <- simul(125, 444, 1e4, "Normal", "Skewed6")
 results_1e5_NS <- simul(125, 444, 1e5, "Normal", "Skewed6")
@@ -233,6 +279,26 @@ results_1e4_Ts <- simul(125, 444, 1e4, "T4", "Skewed6")
 results_1e5_Ts <- simul(125, 444, 1e5, "T4", "Skewed6")
 
 library(dplyr)
+
+results_1e3_Tu <- read.csv("simresults_flex_T4_Uniform_1000_444_125_20250403034027.csv")
+results_1e4_Tu <- read.csv("simresults_flex_T4_Uniform_10000_444_125_20250403034723.csv")
+results_1e5_Tu <- read.csv("simresults_flex_T4_Uniform_100000_444_125_20250403035905.csv")
+results_1e3_Ts <- read.csv("simresults_flex_T4_Skewed6_1000_444_125_20250403072637.csv")
+results_1e4_Ts <- read.csv("simresults_flex_T4_Skewed6_10000_444_125_20250403073318.csv")
+results_1e5_Ts <- read.csv("simresults_flex_T4_Skewed6_100000_444_125_20250403074441.csv")
+results_1e3_Tn <- read.csv("simresults_flex_T4_Normal_1000_444_125_20250403031517.csv")
+results_1e4_Tn <- read.csv("simresults_flex_T4_Normal_10000_444_125_20250403032212.csv")
+results_1e5_Tn <- read.csv("simresults_flex_T4_Normal_100000_444_125_20250403033358.csv")
+results_1e3_Nu <- read.csv("simresults_flex_Normal_Uniform_1000_444_125_20250403022535.csv")
+results_1e4_Nu <- read.csv("simresults_flex_Normal_Uniform_10000_444_125_20250403023229.csv")
+results_1e5_Nu <- read.csv("simresults_flex_Normal_Uniform_100000_999_125_20250402232018.csv")
+results_1e3_NS <- read.csv("simresults_flex_Normal_Skewed6_1000_444_125_20250403040536.csv")
+results_1e4_NS <- read.csv("simresults_flex_Normal_Skewed6_10000_444_125_20250403041231.csv")
+results_1e5_NS <- read.csv("simresults_flex_Normal_Skewed6_100000_444_125_20250403042448.csv")
+results_1e3_Nn <- read.csv("simresults_flex_Normal_Normal_1000_444_125_20250403025019.csv")
+results_1e4_Nn <- read.csv("simresults_flex_Normal_Normal_10000_444_125_20250403025712.csv")
+results_1e5_Nn <- read.csv("simresults_flex_Normal_Normal_100000_444_125_20250403030850.csv")
+
 
 # Create a named list of data frames
 dfs <- list(
@@ -264,23 +330,29 @@ head(stacked_results)
 
 gini_conf_width<-Vectorize(function(auc, brate, n){if(any(is.na(brate), is.na(auc))) {NA} else 2*{presize::prec_auc(auc, brate, n)$conf.width}})
 auc_from_gini<-Vectorize(function(x){x/2+.5})
-
+options(scipen=999)
 stacked_results %>% group_by(Simulation) %>%
   summarize(
     m_mnv_log  = mean(gini_model-gini_logistic, na.rm=TRUE),
     sd_mnv_log  = sd(gini_model-gini_logistic, na.rm=TRUE),
     m_log_the  = mean(gini_logistic-theor_gini_combined, na.rm=TRUE),
     sd_log_the  = sd(gini_logistic-theor_gini_combined, na.rm=TRUE),
+    m_log_logs = mean(gini_logistic-gini_logs, na.rm=TRUE),
+    sd_log_logs = sd(gini_logistic-gini_logs, na.rm=TRUE),
     m_mnv_the  = mean(gini_model-theor_gini_combined, na.rm=TRUE),
     sd_mnv_the  = sd(gini_model-theor_gini_combined, na.rm=TRUE),
-    m_mnvs_the = mean(gini_model_rho-theor_gini_combined, na.rm=TRUE),
-    sd_mnvs_the = sd(gini_model_rho-theor_gini_combined, na.rm=TRUE),
+#    m_mnvs_the = mean(gini_model_rho-theor_gini_combined, na.rm=TRUE),
+#    sd_mnvs_the = sd(gini_model_rho-theor_gini_combined, na.rm=TRUE),
     m_mnvs2_the = mean(gini_model_rho2-theor_gini_combined, na.rm=TRUE),
     sd_mnvs2_the = sd(gini_model_rho2-theor_gini_combined, na.rm=TRUE),
     m_logs_the = mean(gini_logs-theor_gini_combined, na.rm=TRUE),
     sd_logs_the = sd(gini_logs-theor_gini_combined, na.rm=TRUE),
     m_mnvs2_logs = mean(gini_model_rho2-gini_logs, na.rm=TRUE),
     sd_mnvs2_logs = sd(gini_model_rho2-gini_logs, na.rm=TRUE),
-    gini_se = mean(gini_conf_width(auc_from_gini(gini_logistic), actual_bad_rate, as.numeric(substring(Simulation, nchar(Simulation) - 2))), na.rm=TRUE)/(2* qnorm(.975))
+    m_mnvs2_logs = mean(gini_model_rho2-gini_logs, na.rm=TRUE),
+    sd_mnvs2_logs = sd(gini_model_rho2-gini_logs, na.rm=TRUE),
+    m_mnvs2_mnv = mean(gini_model_rho2-gini_model, na.rm=TRUE),
+    sd_mnvs2_mnv = sd(gini_model_rho2-gini_model, na.rm=TRUE),
+gini_se = mean(gini_conf_width(auc_from_gini(gini_logs), actual_bad_rate, as.numeric(substring(Simulation, nchar(Simulation) - 2))), na.rm=TRUE)/(2* qnorm(.975))
   )
 
