@@ -260,24 +260,24 @@ return(results)}
 results_1e3_CGNn <- simul(125, 444, 1e3, "CGN", "Normal")
 
 
-results_1e3_NS <- simul(125, 444, 1e3, "Normal", "Skewed6")
-results_1e4_NS <- simul(125, 444, 1e4, "Normal", "Skewed6")
-results_1e5_NS <- simul(125, 444, 1e5, "Normal", "Skewed6")
-results_1e3_Nu <- simul(125, 444, 1e3, "Normal", "Uniform")
-results_1e4_Nu <- simul(125, 444, 1e4, "Normal", "Uniform")
-results_1e5_Nu <- simul(125, 444, 1e5, "Normal", "Uniform")
-results_1e3_Nn <- simul(125, 444, 1e3, "Normal", "Normal")
-results_1e4_Nn <- simul(125, 444, 1e4, "Normal", "Normal")
-results_1e5_Nn <- simul(125, 444, 1e5, "Normal", "Normal")
-results_1e3_Tn <- simul(125, 444, 1e3, "T4", "Normal")
-results_1e4_Tn <- simul(125, 444, 1e4, "T4", "Normal")
-results_1e5_Tn <- simul(125, 444, 1e5, "T4", "Normal")
-results_1e3_Tu <- simul(125, 444, 1e3, "T4", "Uniform")
-results_1e4_Tu <- simul(125, 444, 1e4, "T4", "Uniform")
-results_1e5_Tu <- simul(125, 444, 1e5, "T4", "Uniform")
-results_1e3_Ts <- simul(125, 444, 1e3, "T4", "Skewed6")
-results_1e4_Ts <- simul(125, 444, 1e4, "T4", "Skewed6")
-results_1e5_Ts <- simul(125, 444, 1e5, "T4", "Skewed6")
+# results_1e3_NS <- simul(125, 444, 1e3, "Normal", "Skewed6")
+# results_1e4_NS <- simul(125, 444, 1e4, "Normal", "Skewed6")
+# results_1e5_NS <- simul(125, 444, 1e5, "Normal", "Skewed6")
+# results_1e3_Nu <- simul(125, 444, 1e3, "Normal", "Uniform")
+# results_1e4_Nu <- simul(125, 444, 1e4, "Normal", "Uniform")
+# results_1e5_Nu <- simul(125, 444, 1e5, "Normal", "Uniform")
+# results_1e3_Nn <- simul(125, 444, 1e3, "Normal", "Normal")
+# results_1e4_Nn <- simul(125, 444, 1e4, "Normal", "Normal")
+# results_1e5_Nn <- simul(125, 444, 1e5, "Normal", "Normal")
+# results_1e3_Tn <- simul(125, 444, 1e3, "T4", "Normal")
+# results_1e4_Tn <- simul(125, 444, 1e4, "T4", "Normal")
+# results_1e5_Tn <- simul(125, 444, 1e5, "T4", "Normal")
+# results_1e3_Tu <- simul(125, 444, 1e3, "T4", "Uniform")
+# results_1e4_Tu <- simul(125, 444, 1e4, "T4", "Uniform")
+# results_1e5_Tu <- simul(125, 444, 1e5, "T4", "Uniform")
+# results_1e3_Ts <- simul(125, 444, 1e3, "T4", "Skewed6")
+# results_1e4_Ts <- simul(125, 444, 1e4, "T4", "Skewed6")
+# results_1e5_Ts <- simul(125, 444, 1e5, "T4", "Skewed6")
 
 library(dplyr)
 
@@ -320,7 +320,8 @@ dfs <- list(
   "T4_Uniform_1e5" = results_1e5_Tu,
   "T4_Skewed6_1e3" = results_1e3_Ts,
   "T4_Skewed6_1e4" = results_1e4_Ts,
-  "T4_Skewed6_1e5" = results_1e5_Ts
+  "T4_Skewed6_1e5" = results_1e5_Ts,
+  "CGN_Normal_1e3" = results_1e3_CGNn
 )
 
 # Stack all data frames and add a column for the source name
