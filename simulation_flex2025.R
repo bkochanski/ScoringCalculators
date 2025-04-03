@@ -182,6 +182,34 @@ for (i in 1:number_of_sim){
     z <- simdata[,c(3, 1:2)]
   }
   
+  if (mycop == "NNC") {
+    #print(sigma[1,3])
+    npar1 <- sigma[1,3]
+    npar2 <- sigma[2,3]
+    cpar <- rho2clayton(r2rho(sigma[1,3]))
+    Matrix <- c(3, 2, 1,
+                0, 2, 1,
+                0, 0, 1)
+    Matrix <- matrix(Matrix, 3, 3)
+    family <- c(0, 3, 1,
+                0, 0, 1,
+                0, 0, 0)
+    family <- matrix(family, 3, 3)
+    par <- c(0, cpar, npar1,
+             0, 0, npar2,
+             0, 0, 0)
+    par <- matrix(par, 3, 3)
+    par2 <- c(0, 0, 0,
+              0, 0, 0,
+              0, 0, 0)
+    par2 <- matrix(par2, 3, 3)
+    library(VineCopula)
+    RVM <- RVineMatrix(Matrix = Matrix, family = family,
+                       par = par, par2 = par2,
+                       names = c("V1", "V2", "V3"))
+    simdata <- RVineSim(sample_size, RVM)
+    z <- simdata[,c(3, 1:2)]
+  }
   
     
   df<-z
@@ -257,8 +285,18 @@ write.csv(results, paste0('simresults_flex', '_', mycop, '_', mymarginals, '_', 
 
 return(results)}
 
-results_1e3_CGNn <- simul(125, 444, 1e3, "CGN", "Normal")
-
+#results_1e3_CGNn <- simul(125, 444, 1e3, "CGN", "Normal")
+# results_1e4_CGNn <- simul(125, 444, 1e4, "CGN", "Normal")
+# results_1e5_CGNn <- simul(125, 444, 1e5, "CGN", "Normal")
+# results_1e3_CGNu <- simul(125, 444, 1e3, "CGN", "Uniform")
+# results_1e4_CGNu <- simul(125, 444, 1e4, "CGN", "Uniform")
+# results_1e5_CGNu <- simul(125, 444, 1e5, "CGN", "Uniform")
+# results_1e3_NNCu <- simul(125, 444, 1e3, "NNC", "Uniform")
+results_1e4_NNCu <- simul(125, 444, 1e4, "NNC", "Uniform")
+results_1e5_NNCu <- simul(125, 444, 1e5, "NNC", "Uniform")
+results_1e3_NNCn <- simul(125, 444, 1e3, "NNC", "Normal")
+results_1e4_NNCn <- simul(125, 444, 1e4, "NNC", "Normal")
+results_1e5_NNCn <- simul(125, 444, 1e5, "NNC", "Normal")
 
 # results_1e3_NS <- simul(125, 444, 1e3, "Normal", "Skewed6")
 # results_1e4_NS <- simul(125, 444, 1e4, "Normal", "Skewed6")
@@ -300,6 +338,8 @@ results_1e3_Nn <- read.csv("simresults_flex_Normal_Normal_1000_444_125_202504030
 results_1e4_Nn <- read.csv("simresults_flex_Normal_Normal_10000_444_125_20250403025712.csv")
 results_1e5_Nn <- read.csv("simresults_flex_Normal_Normal_100000_444_125_20250403030850.csv")
 
+results_1e3_CGNn <- read.csv("simresults_flex_CGN_Normal_1000_444_125_20250403162307.csv")
+
 
 # Create a named list of data frames
 dfs <- list(
@@ -321,7 +361,18 @@ dfs <- list(
   "T4_Skewed6_1e3" = results_1e3_Ts,
   "T4_Skewed6_1e4" = results_1e4_Ts,
   "T4_Skewed6_1e5" = results_1e5_Ts,
-  "CGN_Normal_1e3" = results_1e3_CGNn
+  "CGN_Normal_1e3" = results_1e3_CGNn,
+  "CGN_Normal_1e4" = results_1e4_CGNn,
+  "CGN_Normal_1e5" = results_1e5_CGNn,
+  "CGN_Uniform_1e3" = results_1e3_CGNu,
+  "CGN_Uniform_1e4" = results_1e4_CGNu,
+  "CGN_Uniform_1e5" = results_1e5_CGNu,
+  "NNC_Uniform_1e3" = results_1e3_NNCu,
+  "NNC_Uniform_1e4" = results_1e4_NNCu,
+  "NNC_Uniform_1e5" = results_1e5_NNCu,
+  "NNC_Normal_1e3" = results_1e3_NNCn,
+  "NNC_Normal_1e4" = results_1e4_NNCn,
+  "NNC_Normal_1e5" = results_1e5_NNCn
 )
 
 # Stack all data frames and add a column for the source name
@@ -356,5 +407,7 @@ stacked_results %>% group_by(Simulation) %>%
     m_mnvs2_mnv = mean(gini_model_rho2-gini_model, na.rm=TRUE),
     sd_mnvs2_mnv = sd(gini_model_rho2-gini_model, na.rm=TRUE),
 gini_se = mean(gini_conf_width(auc_from_gini(gini_logs), actual_bad_rate, as.numeric(substring(Simulation, nchar(Simulation) - 2))), na.rm=TRUE)/(2* qnorm(.975))
-  )
+  ) %>% print(n=200)
 
+# library(dplyr)
+# results_1e3_CGNn %>% filter(round(actual_corr,1)==0.5) %>% filter(round(actual_gini1,1)==0.6)

@@ -17,7 +17,6 @@ r2rho <- function(r){6/pi*asin(r/2)}
 
 
 
-
 #### drawing
 
 copsimn<-100000
@@ -61,7 +60,11 @@ points(cumsum(1-simn2$bad[order(simn2$score)])/sum(1-simn2$bad),
 
 cor(simn)
 
-# 
+#
+# for gumbel
+# {sim <- copula::rCopula(1e8,copula::claytonCopula(param = x), dim = 2)
+#   2*bigstatsr::AUC(-sim[,1], 1*(sim[,2]<.1))-1}
+
 
 simulcgn <- function(){
 
@@ -134,3 +137,5 @@ library(splines)
 ncorf2 <- lm(npar ~ ns(gpar, df=4) * ns(gpar, df=4)  * ns(ncor, df=4), results)
 summary(ncorf2)
 plot(ncorf2$fitted.values, results$ncor)
+
+
