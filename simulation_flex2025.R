@@ -292,11 +292,11 @@ return(results)}
 # results_1e4_CGNu <- simul(125, 444, 1e4, "CGN", "Uniform")
 # results_1e5_CGNu <- simul(125, 444, 1e5, "CGN", "Uniform")
 # results_1e3_NNCu <- simul(125, 444, 1e3, "NNC", "Uniform")
-results_1e4_NNCu <- simul(125, 444, 1e4, "NNC", "Uniform")
-results_1e5_NNCu <- simul(125, 444, 1e5, "NNC", "Uniform")
-results_1e3_NNCn <- simul(125, 444, 1e3, "NNC", "Normal")
-results_1e4_NNCn <- simul(125, 444, 1e4, "NNC", "Normal")
-results_1e5_NNCn <- simul(125, 444, 1e5, "NNC", "Normal")
+# results_1e4_NNCu <- simul(125, 444, 1e4, "NNC", "Uniform")
+# results_1e5_NNCu <- simul(125, 444, 1e5, "NNC", "Uniform")
+# results_1e3_NNCn <- simul(125, 444, 1e3, "NNC", "Normal")
+# results_1e4_NNCn <- simul(125, 444, 1e4, "NNC", "Normal")
+# results_1e5_NNCn <- simul(125, 444, 1e5, "NNC", "Normal")
 
 # results_1e3_NS <- simul(125, 444, 1e3, "Normal", "Skewed6")
 # results_1e4_NS <- simul(125, 444, 1e4, "Normal", "Skewed6")
@@ -337,9 +337,14 @@ results_1e5_NS <- read.csv("simresults_flex_Normal_Skewed6_100000_444_125_202504
 results_1e3_Nn <- read.csv("simresults_flex_Normal_Normal_1000_444_125_20250403025019.csv")
 results_1e4_Nn <- read.csv("simresults_flex_Normal_Normal_10000_444_125_20250403025712.csv")
 results_1e5_Nn <- read.csv("simresults_flex_Normal_Normal_100000_444_125_20250403030850.csv")
-
 results_1e3_CGNn <- read.csv("simresults_flex_CGN_Normal_1000_444_125_20250403162307.csv")
-
+results_1e4_CGNn <- read.csv("simresults_flex_CGN_Normal_1000_444_125_20250403162307.csv")
+results_1e3_NNCu
+results_1e4_NNCu
+results_1e5_NNCu
+results_1e3_NNCn
+results_1e4_NNCn
+results_1e5_NNCn
 
 # Create a named list of data frames
 dfs <- list(
@@ -363,7 +368,7 @@ dfs <- list(
   "T4_Skewed6_1e5" = results_1e5_Ts,
   "CGN_Normal_1e3" = results_1e3_CGNn,
   "CGN_Normal_1e4" = results_1e4_CGNn,
-  "CGN_Normal_1e5" = results_1e5_CGNn,
+#  "CGN_Normal_1e5" = results_1e5_CGNn,
   "CGN_Uniform_1e3" = results_1e3_CGNu,
   "CGN_Uniform_1e4" = results_1e4_CGNu,
   "CGN_Uniform_1e5" = results_1e5_CGNu,

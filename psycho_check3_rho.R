@@ -134,7 +134,13 @@ ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', Bad_Ra
   xlab('')+ylab('')+xlim(c(0.2, .75)) +
   theme_bw()
 
+source('Gini_combined_master.R')
 
-
-
-
+gini_combine_calculator <- Vectorize(gini_combine_calculator)
+new_gini_1 <-gini_combine_calculator(data$Gini_Bureau, data$Gini_Psych, data$r_Bureau_Psych, data$Bad_Rate)[1,]
+new_gini_2 <-gini_combine_calculator(data$Gini_Bureau, data$Gini_Psych, data$rho_Bureau_Psych, data$Bad_Rate, method="spearman")[1,]
+data.frame(new_gini_1, compare1 = data$Gini_Predict_r, new_gini_2, compare2 = data$Gini_Predict_rho2)
+round(new_gini_1-new_gini_2,4)
+round(data$Gini_Predict_r-data$Gini_Predict_rho2,4)
+sd(round(new_gini_1-new_gini_2,4))
+sd(round(data$Gini_Predict_r-data$Gini_Predict_rho2,4))

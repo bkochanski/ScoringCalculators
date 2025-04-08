@@ -29,7 +29,8 @@ r_from_gini <- function(gini, defaultrate = .1) {
           tol = .Machine$double.eps)$root
 }
 
-gini_combine_calculator <- function(g1, g2, corr, defaultrate) {
+gini_combine_calculator <- function(g1, g2, corr, defaultrate, method="pearson") {
+  if(method=="spearman"){corr = 2*sin(corr*pi/6)}
   phi_s1 <- function(x) {gini_from_r(rho = x, defrate = defaultrate) - g1}
   rho_s1 <- uniroot(phi_s1,
             lower = 0,
