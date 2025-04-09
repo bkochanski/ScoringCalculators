@@ -416,7 +416,10 @@ stacked_results %>% group_by(Simulation) %>%
     m_mnvs2_mnv = mean(gini_model_rho2-gini_model, na.rm=TRUE),
     sd_mnvs2_mnv = sd(gini_model_rho2-gini_model, na.rm=TRUE),
 gini_se = mean(gini_conf_width(auc_from_gini(gini_logs), actual_bad_rate, as.numeric(substring(Simulation, nchar(Simulation) - 2))), na.rm=TRUE)/(2* qnorm(.975))
-  ) %>% print(n=200)
+  ) -> stacked_results_2 
+stacked_results_2 %>% print(n=200)
+#View(stacked_results_2)
+write.csv2(stacked_results_2,"stacked_results_2.csv")
 
 # library(dplyr)
 # results_1e3_CGNn %>% filter(round(actual_corr,1)==0.5) %>% filter(round(actual_gini1,1)==0.6)
