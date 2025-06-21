@@ -44,7 +44,7 @@ library(ggrepel)
 p3 <- gdf %>% ggplot()+ theme_bw()+ 
   xlab("Normalized weight of scorecard 1") + 
   ylab("Gini of the combined scorecard")+ 
-  scale_x_continuous(breaks=1:5/5) +
+  scale_x_continuous(breaks=0:5/5) +
   geom_line(aes(x=ws, y=corr1)) +
   geom_line(aes(x=ws, y=corr2), lty=2) +
   geom_line(aes(x=ws, y=corr3), lty=3) +
@@ -57,7 +57,7 @@ p3 <- gdf %>% ggplot()+ theme_bw()+
 print(p3)
 
 # Save as EPS
-ggsave("fig03.eps", plot = p3, device = "eps", width = 7, height = 5)
+ggsave("fig03.eps", plot = p3, device = "eps") #Saving 7.28 x 5.18 in image
 
  
                    

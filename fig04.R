@@ -22,4 +22,4 @@ p4 <- direct.label(plot2, "get.means")
 print(p4)
 
 # Save as EPS
-ggsave("fig04.eps", plot = p4, device = "eps", width = 7, height = 5)
+ggsave("fig04.eps", plot = p4, device = "eps")

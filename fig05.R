@@ -2,7 +2,7 @@ source('Gini_combined_master.R')
 
 #data<-readxl::read_excel('C:/Users/blaze/Downloads/data.xlsx')
 #data<-readxl::read_excel('C:/Users/Błażej/Downloads/data.xlsx')
-data<-readxl::read_excel('/Users/blakocha/Downloads/data.xlsx')
+#data<-readxl::read_excel('/Users/blakocha/Downloads/data.xlsx')
 
 data$Region <- c("Mexico", "Brazil", "Ukraine", "Ecuador")
 
@@ -73,4 +73,4 @@ p5 <- ggplot(data, aes(y=paste0(Sample, ': ', Region, '\nN=', N, '\nbad rate=', 
 print(p5)
 
 # Save as EPS
-ggsave("fig05.eps", plot = p5, device = "eps", width = 7, height = 5)
+ggsave("fig05.eps", plot = p5, device = "eps")
