@@ -97,10 +97,10 @@ ui <- fluidPage(
               condition = "input.METHOD == 'BiProper'",
               sliderInput("C1",
                           "Shape 1:",
-                          min = -0.7,
-                          max = 0.7,
+                          min = -0.3,
+                          max = 0.3,
                           value = 0.0,
-                          step = 0.01)
+                          step = 0.005)
             ),
             conditionalPanel(
               condition = "input.METHOD == 'BiNormal' || input.METHOD == 'BiProper'",
@@ -121,10 +121,10 @@ ui <- fluidPage(
               condition = "input.METHOD == 'BiProper' && input.SAMESHAPE==0",
               sliderInput("C2",
                           "Shape 2:",
-                          min = -0.7,
-                          max = 0.7,
+                          min = -0.3,
+                          max = 0.3,
                           value = 0.0,
-                          step = 0.01)
+                          step = 0.01/2)
             )
         ),
 
@@ -180,8 +180,17 @@ tpf <- function(v_c, c, d_a) {
 v_c_from_fpf <- function(fpfF, fpf_){
   uniroot(function(x){fpfF(x)-fpf_}, lower = -100, upper = 100)$root
 }
+v_c_from_tpf <- function(tpfF, tpf_){
+  uniroot(function(x){tpfF(x)-tpf_}, lower = -100, upper = 100)$root
+}
 
 FuncBiProper <- Vectorize(function(x,c1,d_a1){tpf(v_c_from_fpf(function(x){fpf(x,c1,d_a1)},x), c1, d_a1)})
+ProperBiNormalDeriv <- Vectorize(function(x, c_, d_a_){
+  s = v_c_from_tpf(function(x){tpf(x,c_,d_a_)},x)
+  res = ((1+c_)*(dnorm(-(1+c_)*s+d_a_/2*sqrt(1+c_^2)) + dnorm(-(1+c_)*s+d_a_/2/c_*sqrt(1+c_^2)) ))/
+    ((1-c_)*(dnorm(-(1-c_)*s-d_a_/2*sqrt(1+c_^2)) + dnorm(-(1-c_)*s+d_a_/2/c_*sqrt(1+c_^2))))
+  return(res)
+})
 
 ##### SERVER #####
 server <- function(input, output) {
@@ -552,6 +561,7 @@ server <- function(input, output) {
     b0_bp <- reactive({B()*(1-y0_bp(x0_bp()))/a0()})
     
     deriv0_bp <-  reactive({numDeriv::grad(y0_bp, x0_bp())})
+    #deriv0_bp <-  reactive({ProperBiNormalDeriv(x0_bp(), c1(), da1())})
     mbr0_bp <- reactive({(1+(1-B())/B()/deriv0_bp())^(-1)})
     ir0_bp <-  reactive({mbr0_bp()/(1-mbr0_bp())})
     profit0_bp <- reactive({a0()*(ir0_bp()*(1-b0_bp())-b0_bp())})
@@ -564,7 +574,8 @@ server <- function(input, output) {
     x1_bp<-reactive({as.numeric(uniroot(phi1_bp,lower=0,upper=1,tol = .Machine$double.eps)[1])})
     b1_bp <- reactive({B()*(1-y1_bp(x1_bp()))/a0()})
     
-    deriv1_bp <- reactive({numDeriv::grad(y1_bp, x1_bp())})
+    #deriv1_bp <- reactive({numDeriv::grad(y1_bp, x1_bp())})
+    deriv1_bp <- reactive({ProperBiNormalDeriv(x1_bp(), ifelse(sameshape(), c1(), c2()), da2())})
     mbr1_bp <- reactive({(1+(1-B())/B()/deriv1_bp())^(-1)})
     ir1_bp <- reactive({ir0_bp()})
     profit1_bp <- reactive({a1_bp()*(ir1_bp()*(1-b1_bp())-b1_bp())})
@@ -580,7 +591,8 @@ server <- function(input, output) {
     x2_bp <- reactive({as.numeric(uniroot(phi2_bp,lower=0.001,upper=.999,tol = .Machine$double.eps))[1]})
     a2_bp <- reactive({((1-B())*(1-x2_bp())+B()*(1-y1_bp(x2_bp())))})
     
-    deriv2_bp <- reactive({numDeriv::grad(y1_bp, x2_bp())})
+    #deriv2_bp <- reactive({numDeriv::grad(y1_bp, x2_bp())})
+    deriv2_bp <- reactive({ProperBiNormalDeriv(x2_bp(), ifelse(sameshape(), c1(), c2()), da2())})
     mbr2_bp <- reactive({(1+(1-B())/B()/deriv2_bp())^(-1)})
     ir2_bp <- reactive({ir0_bp()})
     profit2_bp <- reactive({a2_bp()*(ir2_bp()*(1-b2_bp())-b2_bp())})
@@ -597,7 +609,8 @@ server <- function(input, output) {
     a3_bp <- reactive({((1-B())*(1-x3_bp())+B()*(1-y1_bp(x3_bp())))})
     b3_bp <- reactive({B()*(1-y1_bp(x3_bp()))/a3_bp()})
     
-    deriv3_bp <- reactive({numDeriv::grad(y1_bp, x3_bp())})
+    #deriv3_bp <- reactive({numDeriv::grad(y1_bp, x3_bp())})
+    deriv3_bp <- reactive({ProperBiNormalDeriv(x3_bp(), ifelse(sameshape(), c1(), c2()), da2())})
     mbr3_bp <- reactive({(1+(1-B())/B()/deriv3_bp())^(-1)})
     ir3_bp <- reactive({ir0_bp()})
     profit3_bp <- reactive({a3_bp()*(ir3_bp()*(1-b3_bp())-b3_bp())})
@@ -677,6 +690,7 @@ server <- function(input, output) {
                   axis.title=element_text(size=16,face="bold"),
                   legend.text=element_text(size=11)) +
             guides(color = guide_legend(order = 1)) +
+            coord_fixed( ratio=1) +
             geom_text_repel(data = df[2:4,],
                 mapping = aes(x=xcord, y=ycord, label = labels),
                 size=5,

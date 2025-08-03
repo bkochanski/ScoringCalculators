@@ -1,0 +1,12 @@
+name: BetterGiniCalc
+title: BetterGiniCalc
+username:
+account: blakocha
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4531106
+bundleId: 7637839
+url: https://blakocha.shinyapps.io/BetterGiniCalc/
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app_202304.R|app_202305.R|app_202306.R|app_202308_test.R|app_prev.R|test_chart.R
