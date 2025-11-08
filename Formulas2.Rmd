@@ -1,0 +1,128 @@
+---
+title: "Formulas"
+output: html_document
+date: "2025-06-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Formula 2:
+
+$$\boldsymbol{X} = \left[ \begin{matrix} S_1\\S_2\\L \end{matrix}\right] \sim N\left(\boldsymbol{\mu}, \boldsymbol{\Sigma}\right)$$
+
+Formula 3:
+
+$$\boldsymbol{\mu} = \left[ \begin{matrix} 0\\0\\0 \end{matrix}\right]$$
+
+Formula 4:
+
+$$\boldsymbol{\Sigma} = \left[ \begin{matrix} 1 & \rho_B & \rho_1 \\
+\rho_B & 1 & \rho_2 \\
+\rho_1 & \rho_2 & 1 \end{matrix}\right]$$
+
+
+Formula 5:
+
+$$Y=\begin{array}{lll}1 & \text{if} & L<\Phi^{-1}(\delta) \\0 & \text{if} & L \geq \Phi^{-1}(\delta)\end{array}$$
+
+Formula 6:
+
+$$\operatorname{Gini}_j=2 \int F\left(s_j \mid Y=1\right)dF\left(s_j \mid Y=0\right) - 1$$
+
+Formula 7:
+
+$$F\left(s_{j} \mid Y=1\right)=\frac{1}{\delta} \int_{-\infty}^{s_{j}} \Phi\left(\frac{\Phi^{-1}(\delta)-\rho_{j} x}{\sqrt{1-\rho_{j}^{2}}}\right) \phi(x) d x$$
+
+Formula 8:
+
+$$F\left(s_{j} \mid Y=0\right)=\frac{1}{1-\delta} \int_{-\infty}^{s_{j}} \Phi\left(\frac{-\Phi^{-1}(\delta)+\rho_{j} x}{\sqrt{1-\rho_{j}^{2}}}\right) \phi(x) d x$$
+
+Formula 9:
+
+$$\quad \boldsymbol{A}=\left[\begin{array}{ccc}a & b & 0 \\
+0 & 0 & 1\end{array}\right]$$ 
+
+Formula 10:
+
+$$\boldsymbol{A}\boldsymbol{\Sigma} \boldsymbol{A}^{\prime} = \left[\begin{array}{cc} a^{2}+2 a b \rho_{B}+b^{2} & a \rho_{1}+b \rho_{2} \\
+a \rho_{1}+b \rho_{2} & 1 \end{array}\right]$$
+
+Formula 11:
+
+$$ \rho_{new}=\frac{a \rho_{1}+b \rho_{2}}{\sqrt{a^{2}+2 a b \rho_{B}+b^{2}}} $$
+
+Formula 12:
+
+$$\rho_{new}(a)=\frac{a \rho_{1}+\rho_{2}}{\sqrt{a^{2}+2 a \rho_{B}+1}}$$
+
+Formula 13:
+
+$$\rho_{\text {new }}^{\prime}(a)=\frac{a \rho_{1} \rho_{B}+\rho_{1}-a \rho_{2}-\rho_{2} \rho_{B}}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{3}{2}}}$$
+
+Formula 14:
+
+$$a_{0}=\left(\rho_{2} \rho_{B}-\rho_{1}\right) /\left(\rho_{1} \rho_{B}-\rho_{2}\right).$$
+
+Formula 15:
+
+$$\rho_{\text {new }}^{\prime \prime}(a)=\frac{\rho_{1} \rho_{B}-\rho_{2}}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{3}{2}}}-\frac{3\left(a+\rho_{B}\right)\left(a \rho_{1} \rho_{B}-a \rho_{2}+\rho_{1}-\rho_{2} \rho_{B}\right)}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}$$
+
+
+Formula 15b:
+
+$$\rho_{\text {new }}^{\prime \prime}(a)=\frac{\left(a^{2}+2 a \rho_{B}+1\right)\left(\rho_{1} \rho_{B}-\rho_{2}\right)}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{3}{2}}}-\frac{3\left(a+\rho_{B}\right)\left(a \rho_{1} \rho_{B}-a \rho_{2}+\rho_{1}-\rho_{2} \rho_{B}\right)}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}$$
+
+
+Formula 15c:
+
+$$\rho_{\text {new }}^{\prime \prime}(a)=\frac{a^{2}\rho_{1} \rho_{B}+2 a \rho_{B}\rho_{1} \rho_{B}+\rho_{1} \rho_{B}-a^{2}\rho_{2}-2 a \rho_{B}\rho_{2}-\rho_{2}}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}-\frac{3\left(a+\rho_{B}\right)\left(a \rho_{1} \rho_{B}-a \rho_{2}+\rho_{1}-\rho_{2} \rho_{B}\right)}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}$$
+
+
+Formula 15d:
+
+$$\rho_{\text {new }}^{\prime \prime}(a)=\frac{a^{2}\rho_{1} \rho_{B}+2 a \rho_{B}\rho_{1} \rho_{B}+\rho_{1} \rho_{B}-a^{2}\rho_{2}-2 a \rho_{B}\rho_{2}-\rho_{2}}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}-\frac{3\left(a\left(a \rho_{1} \rho_{B}-a \rho_{2}+\rho_{1}-\rho_{2} \rho_{B}\right)+\rho_{B}\left(a \rho_{1} \rho_{B}-a \rho_{2}+\rho_{1}-\rho_{2} \rho_{B}\right)\right)}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}$$
+
+Formula 15e:
+
+$$\rho_{\text {new }}^{\prime \prime}(a)=\frac{a^{2}\rho_{1} \rho_{B}+2 a \rho_{B}\rho_{1} \rho_{B}+\rho_{1} \rho_{B}-a^{2}\rho_{2}-2 a \rho_{B}\rho_{2}-\rho_{2}}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}-\frac{3\left(a^2 \rho_{1} \rho_{B}-a^2 \rho_{2}+a\rho_{1}-a\rho_{2} \rho_{B}+a \rho_{1} \rho_{B}^2-a \rho_{2}\rho_{B}+\rho_{1}\rho_{B}-\rho_{2} \rho_{B}^2\right)}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}$$
+
+
+Formula 15f:
+
+$$\rho_{\text {new }}^{\prime \prime}(a)=\frac{a^{2}\rho_{1} \rho_{B}+2 a \rho_{B}\rho_{1} \rho_{B}+\rho_{1} \rho_{B}-a^{2}\rho_{2}-2 a \rho_{B}\rho_{2}-\rho_{2}}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}-\frac{\left(3a^2 \rho_{1} \rho_{B}-3a^2 \rho_{2}+3a\rho_{1}-3a\rho_{2} \rho_{B}+3a \rho_{1} \rho_{B}^2-3a \rho_{2}\rho_{B}+3\rho_{1}\rho_{B}-3\rho_{2} \rho_{B}^2\right)}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}$$
+
+Formula 15g:
+
+$$\rho_{\text {new }}^{\prime \prime}(a)=\frac{a^{2}\rho_{1} \rho_{B}+2 a \rho_{B}\rho_{1} \rho_{B}+\rho_{1} \rho_{B}-a^{2}\rho_{2}-2 a \rho_{B}\rho_{2}-\rho_{2}}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}+\frac{\left(-3a^2 \rho_{1} \rho_{B}+3a^2 \rho_{2}-3a\rho_{1}+3a\rho_{2} \rho_{B}-3a \rho_{1} \rho_{B}^2+3a \rho_{2}\rho_{B}-3\rho_{1}\rho_{B}+3\rho_{2} \rho_{B}^2\right)}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}$$
+
+Formula 15h:
+
+$$\rho_{\text {new }}^{\prime \prime}(a)=\frac{a^{2}\rho_{1} \rho_{B}+2 a \rho_{1} \rho_{B}^2+\rho_{1} \rho_{B}-a^{2}\rho_{2}-2 a \rho_{B}\rho_{2}-\rho_{2}-3a^2 \rho_{1} \rho_{B}+3a^2 \rho_{2}-3a\rho_{1}+3a\rho_{2} \rho_{B}-3a \rho_{1} \rho_{B}^2+3a \rho_{2}\rho_{B}-3\rho_{1}\rho_{B}+3\rho_{2} \rho_{B}^2}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}$$
+
+
+Formula 15i:
+
+$$\rho_{\text {new }}^{\prime \prime}(a)=\frac{-2a^{2}\rho_{1} \rho_{B}- a \rho_{1} \rho_{B}^2-2\rho_{1} \rho_{B} + 2a^2\rho_{2}+4a\rho_{2} \rho_{B}-\rho_{2}-3a\rho_{1}+3\rho_{2} \rho_{B}^2}{\left(a^{2}+2 a \rho_{B}+1\right)^{\frac{5}{2}}}$$
+
+Formula 16:
+
+
+$$\rho_{\text{new}}\left(a_{0}\right)=\frac{a_{0} \rho_{1}+\rho_{2}}{\sqrt{a_{0}^{2}+2 a_{0} \rho_{B}+1}}\\=\frac{\left(\rho_{2} \rho_{B}-\rho_{1}\right) \rho_{1} /\left(\rho_{1} \rho_{B}-\rho_{2}\right)+\rho_{2}}{\sqrt{\left(\rho_{2} \rho_{B}-\rho_{1}\right)^{2} /\left(\rho_{1} \rho_{B}-\rho_{2}\right)^{2}+2\left(\rho_{2} \rho_{B}-\rho_{1}\right) /\left(\rho_{1} \rho_{B}-\rho_{2}\right) \rho_{B}+1}}$$
+
+Formula 17:
+
+$$w_{1}=\frac{a_{0}}{1+a_{0}}=\frac{\left(\rho_{1}-\rho_{2} \rho_{B}\right)}{\left(\rho_{1}+\rho_{2}\right)\left(1-\rho_{B}\right)}$$
+
+Formula 18:
+
+$$w_{2}=\frac{1}{1+a_{0}}=\frac{\left(\rho_{2}-\rho_{1} \rho_{B}\right)}{\left(\rho_{1}+\rho_{2}\right)\left(1-\rho_{B}\right)}$$
+
+Formula 19:
+
+$$\rho_{B}>\min \left(\frac{\rho_{1}}{\rho_{2}} ; \frac{\rho_{2}}{\rho_{1}}\right)$$
+
+Formula 20:
+
+$$\hat{\rho}_B = 2sin\left(\frac{\pi}{6}\hat{\rho}_S\right)$$ 
