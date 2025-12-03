@@ -1,8 +1,3 @@
-# Nadal do zrobienia:
-# Przeskakuje po zmiane default rate
-# Kolorystyka
-# Linie
-
 library(shiny)
 library(shinydashboard)
 library(ggplot2)
@@ -17,23 +12,16 @@ ui <- dashboardPage(
   # SIDEBAR
   dashboardSidebar(
     width = 350,
-    h4("Input Parameters", style = "text-align: center; padding: 10px; font-size: 22px; font-weight: bold;"),
+    h4("Input Parameters", style = "text-align: center; padding: 10px;"),
     
-    div(style = "padding: 0 15px; margin-bottom: 30px;",
-        tags$style(HTML("
-                .irs-bar {height: 14px;}
-                .irs-line {height: 14px;}
-                .irs-slider {width: 26px; height: 26px; top: 19px;}
-                .irs-from, .irs-to, .irs-single {font-size: 16px;}
-                .irs-grid-text {font-size: 14px;}
-            ")),
+    div(style = "padding: 0 15px; margin-bottom: 20px;",
         sliderInput("g1",
                     "GINI 1:",
                     min = 0,
                     max = 1,
                     value = .4,
                     step = .01,
-                    width = "65%"),
+                    width = "70%"),
         numericInput("g1_num",
                      NULL,
                      min = 0,
@@ -43,14 +31,14 @@ ui <- dashboardPage(
                      width = "100px")
     ),
     
-    div(style = "padding: 0 15px; margin-bottom: 30px;",
+    div(style = "padding: 0 15px; margin-bottom: 20px;",
         sliderInput("g2",
                     "GINI 2:",
                     min = 0,
                     max = 1,
                     value = .3,
                     step = .01,
-                    width = "65%"),
+                    width = "70%"),
         numericInput("g2_num",
                      NULL,
                      min = 0,
@@ -60,14 +48,14 @@ ui <- dashboardPage(
                      width = "100px")
     ),
     
-    div(style = "padding: 0 15px; margin-bottom: 30px;",
+    div(style = "padding: 0 15px; margin-bottom: 20px;",
         sliderInput("corr",
                     "Correlation:",
                     min = 0,
                     max = 1,
                     value = .15,
                     step = .01,
-                    width = "65%"),
+                    width = "70%"),
         numericInput("corr_num",
                      NULL,
                      min = 0,
@@ -77,14 +65,14 @@ ui <- dashboardPage(
                      width = "100px")
     ),
     
-    div(style = "padding: 0 15px; margin-bottom: 30px;",
+    div(style = "padding: 0 15px; margin-bottom: 20px;",
         sliderInput("defrate",
                     "Default rate:",
                     min = 0,
                     max = 1,
                     value = .1,
                     step = .01,
-                    width = "65%"),
+                    width = "70%"),
         numericInput("defrate_num",
                      NULL,
                      min = 0,
@@ -92,35 +80,18 @@ ui <- dashboardPage(
                      value = .1,
                      step = .01,
                      width = "100px")
-    ),
-    
-    tags$style(HTML("
-            .sidebar label {font-size: 19px; font-weight: 700;}
-            .sidebar input[type='number'] {font-size: 19px; height: 48px;}
-        "))
+    )
   ),
   
   # BODY
   dashboardBody(
-    tags$style(HTML("
-            .small-box {height: 65px;}
-            .small-box .icon-large {font-size: 40px;}
-            .small-box h3 {font-size: 22px; margin: 3px 0;}
-            .small-box p {font-size: 11px; margin: 0;}
-            .info-box {height: 60px; min-height: 60px;}
-            .info-box-icon {height: 60px; line-height: 60px; font-size: 24px;}
-            .info-box-content {padding: 5px 8px;}
-            .info-box-text {font-size: 11px;}
-            .info-box-number {font-size: 18px; font-weight: bold;}
-        ")),
-    
     fluidRow(
       box(
         title = "GINI Combination Chart",
         width = 12,
         status = "primary",
         solidHeader = TRUE,
-        plotOutput("gini_chart", height = "700px")
+        plotOutput("gini_chart", height = "500px")
       )
     ),
     
@@ -132,6 +103,7 @@ ui <- dashboardPage(
       infoBoxOutput("box_weight1", width = 6),
       infoBoxOutput("box_weight2", width = 6)
     ),
+    br(),
     
     fluidRow(
       valueBoxOutput("box_new_rho", width = 12)
@@ -141,6 +113,7 @@ ui <- dashboardPage(
       infoBoxOutput("box_rho1", width = 6),
       infoBoxOutput("box_rho2", width = 6)
     ),
+    br(),
     
     fluidRow(
       valueBoxOutput("box_a_opt", width = 12)
@@ -316,35 +289,27 @@ server <- function(input, output, session) {
     
     # Create the plot
     p <- ggplot() + 
-      theme_bw(base_size = 20) + 
+      theme_bw() + 
       xlab("Normalized weight of scorecard 1") + 
       ylab("Gini of the combined scorecard") + 
       scale_x_continuous(breaks=0:5/5) +
-      theme(
-        axis.title = element_text(size = 24, face = "bold"),
-        axis.text = element_text(size = 18),
-        plot.margin = margin(25, 25, 25, 25)
-      ) +
-      geom_line(data=gdf, aes(x=ws, y=corr1), color="steelblue", size=2) +
+      geom_line(data=gdf, aes(x=ws, y=corr1), color="steelblue", size=1) +
       geom_point(data=gresdf, aes(x=score_1_weight, y=new_gini), 
-                 color="red", size=7) +
+                 color="red", size=3) +
       geom_text_repel(data=gresdf, 
                       aes(x=score_1_weight, y=new_gini, 
                           label=round(new_gini, 3)),
-                      color="red", fontface="bold", size=8,
-                      box.padding = 1.5) +
+                      color="red", fontface="bold") +
       geom_label(data=gresdf, 
                  aes(x=score_1_weight, y=y30, 
                      label=paste0("corr = ", corr)),
-                 nudge_y = -0.01, size=6.5) +
+                 nudge_y = -0.01) +
       geom_text_repel(data=data.frame(x=-0.05, y=g["gini2"], 
                                       la=paste0("Gini of scorecard 2 = ", round(g["gini2"], 3))),
-                      aes(x=x, y=y, label=la), size=6.5,
-                      box.padding = 1.5) +
+                      aes(x=x, y=y, label=la)) +
       geom_text_repel(data=data.frame(x=1.05, y=g["gini1"], 
                                       la=paste0("Gini of scorecard 1 = ", round(g["gini1"], 3))),
-                      aes(x=x, y=y, label=la), size=6.5,
-                      box.padding = 1.5)
+                      aes(x=x, y=y, label=la))
     
     print(p)
   })
@@ -352,7 +317,7 @@ server <- function(input, output, session) {
   # BOXES
   output$box_new_gini <- renderValueBox({
     valueBox("GINI of combined models", 
-             tags$p(round(resultVector()[1], 4), style = 'font-size: 120%; font-weight: bold;'), 
+             tags$p(round(resultVector()[1], 4), style = 'font-size: 200%; font-weight: bold;'), 
              icon=icon("compress-arrows-alt"), 
              color = "light-blue")
   })
@@ -373,7 +338,7 @@ server <- function(input, output, session) {
   
   output$box_new_rho <- renderValueBox({
     valueBox("New rho", 
-             tags$p(round(resultVector()[7], 4), style = 'font-size: 120%; font-weight: bold;'), 
+             tags$p(round(resultVector()[7], 4), style = 'font-size: 200%; font-weight: bold;'), 
              icon=icon("chart-line"), 
              color = "olive")
   })
@@ -394,7 +359,7 @@ server <- function(input, output, session) {
   
   output$box_a_opt <- renderValueBox({
     valueBox("A opt", 
-             tags$p(round(resultVector()[2], 4), style = 'font-size: 120%; font-weight: bold;'), 
+             tags$p(round(resultVector()[2], 4), style = 'font-size: 200%; font-weight: bold;'), 
              icon=icon("cloudscale"), 
              color = "yellow")
   })
