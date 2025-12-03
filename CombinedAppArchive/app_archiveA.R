@@ -35,7 +35,7 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .4,
-                     step = .0001,
+                     step = .01,
                      width = "130px")
     ),
     
@@ -52,7 +52,7 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .3,
-                     step = .0001,
+                     step = .01,
                      width = "130px")
     ),
     
@@ -69,7 +69,7 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .15,
-                     step = .0001,
+                     step = .01,
                      width = "130px")
     ),
     
@@ -86,7 +86,7 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .1,
-                     step = .0001,
+                     step = .01,
                      width = "130px")
     ),
     

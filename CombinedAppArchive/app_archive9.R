@@ -35,8 +35,8 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .4,
-                     step = .0001,
-                     width = "130px")
+                     step = .01,
+                     width = "110px")
     ),
     
     div(style = "padding: 0 15px; margin-bottom: 30px;",
@@ -52,8 +52,8 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .3,
-                     step = .0001,
-                     width = "130px")
+                     step = .01,
+                     width = "110px")
     ),
     
     div(style = "padding: 0 15px; margin-bottom: 30px;",
@@ -69,8 +69,8 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .15,
-                     step = .0001,
-                     width = "130px")
+                     step = .01,
+                     width = "110px")
     ),
     
     div(style = "padding: 0 15px; margin-bottom: 30px;",
@@ -86,8 +86,8 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .1,
-                     step = .0001,
-                     width = "130px")
+                     step = .01,
+                     width = "110px")
     ),
     
     tags$style(HTML("
@@ -345,22 +345,19 @@ server <- function(input, output, session) {
                       aes(x=score_1_weight, y=new_gini, 
                           label=round(new_gini, 3)),
                       color="red", fontface="bold", size=8,
-                      box.padding = 1.5,
-                      min.segment.length = 0) +
-      geom_label(data=gresdf, 
+                      box.padding = 1.5) +
+      geom_label_repel(data=gresdf, 
                  aes(x=score_1_weight, y=ycorr, 
                      label=paste0("corr = ", corr)),
                  size=6.5) +
       geom_text_repel(data=data.frame(x=0, y=g["gini2"], 
                                       la=paste0("Gini of scorecard 2 = ", round(g["gini2"], 3))),
                       aes(x=x, y=y, label=la), size=6.5,
-                      box.padding = 1.5,
-                      min.segment.length = 0) +
+                      box.padding = 1.5) +
       geom_text_repel(data=data.frame(x=1, y=g["gini1"], 
                                       la=paste0("Gini of scorecard 1 = ", round(g["gini1"], 3))),
                       aes(x=x, y=y, label=la), size=6.5,
-                      box.padding = 1.5,
-                      min.segment.length = 0)
+                      box.padding = 1.5)
     
     print(p)
   })

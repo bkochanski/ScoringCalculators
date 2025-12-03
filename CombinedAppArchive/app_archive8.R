@@ -3,7 +3,6 @@ library(shinydashboard)
 library(ggplot2)
 library(dplyr)
 library(ggrepel)
-library(later)
 
 ui <- dashboardPage(
   
@@ -35,8 +34,8 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .4,
-                     step = .0001,
-                     width = "130px")
+                     step = .01,
+                     width = "200px")
     ),
     
     div(style = "padding: 0 15px; margin-bottom: 30px;",
@@ -52,8 +51,8 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .3,
-                     step = .0001,
-                     width = "130px")
+                     step = .01,
+                     width = "200px")
     ),
     
     div(style = "padding: 0 15px; margin-bottom: 30px;",
@@ -69,8 +68,8 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .15,
-                     step = .0001,
-                     width = "130px")
+                     step = .01,
+                     width = "200px")
     ),
     
     div(style = "padding: 0 15px; margin-bottom: 30px;",
@@ -86,8 +85,8 @@ ui <- dashboardPage(
                      min = 0,
                      max = 1,
                      value = .1,
-                     step = .0001,
-                     width = "130px")
+                     step = .01,
+                     width = "200px")
     ),
     
     tags$style(HTML("
@@ -183,100 +182,70 @@ gini_combine_calculator <- function(g1, g2, corr, defaultrate){
 
 # Define server logic
 server <- function(input, output, session) {
-  # Reactive values to store the actual values to use
-  values <- reactiveValues(
-    g1 = 0.4,
-    g2 = 0.3,
-    corr = 0.15,
-    defrate = 0.1,
-    updating = FALSE
+  # Track which input was last changed
+  lastChanged <- reactiveValues(
+    g1 = "slider",
+    g2 = "slider", 
+    corr = "slider",
+    defrate = "slider"
   )
   
-  # Input values - use the stored values
-  G1 <- reactive({ values$g1 })
-  G2 <- reactive({ values$g2 })
-  CORR <- reactive({ values$corr })
-  DR <- reactive({ values$defrate })
+  # Input values converted into reactive values
+  G1 <- reactive({
+    if (lastChanged$g1 == "number") input$g1_num else input$g1
+  })
   
-  # Update stored values and sync controls with locking mechanism
+  G2 <- reactive({
+    if (lastChanged$g2 == "number") input$g2_num else input$g2
+  })
+  
+  CORR <- reactive({
+    if (lastChanged$corr == "number") input$corr_num else input$corr
+  })
+  
+  DR <- reactive({
+    if (lastChanged$defrate == "number") input$defrate_num else input$defrate
+  })
+  
+  # Synchronize sliders and numeric inputs
   observeEvent(input$g1, {
-    if (!values$updating) {
-      values$updating <- TRUE
-      values$g1 <- input$g1
-      updateNumericInput(session, "g1_num", value = input$g1)
-      invalidateLater(100)
-      later::later(function() { values$updating <- FALSE }, 0.15)
-    }
+    lastChanged$g1 <- "slider"
+    updateNumericInput(session, "g1_num", value = input$g1)
   }, ignoreInit = TRUE)
   
   observeEvent(input$g1_num, {
-    if (!values$updating) {
-      values$updating <- TRUE
-      values$g1 <- input$g1_num
-      updateSliderInput(session, "g1", value = input$g1_num)
-      invalidateLater(100)
-      later::later(function() { values$updating <- FALSE }, 0.15)
-    }
+    lastChanged$g1 <- "number"
+    updateSliderInput(session, "g1", value = input$g1_num)
   }, ignoreInit = TRUE)
   
   observeEvent(input$g2, {
-    if (!values$updating) {
-      values$updating <- TRUE
-      values$g2 <- input$g2
-      updateNumericInput(session, "g2_num", value = input$g2)
-      invalidateLater(100)
-      later::later(function() { values$updating <- FALSE }, 0.15)
-    }
+    lastChanged$g2 <- "slider"
+    updateNumericInput(session, "g2_num", value = input$g2)
   }, ignoreInit = TRUE)
   
   observeEvent(input$g2_num, {
-    if (!values$updating) {
-      values$updating <- TRUE
-      values$g2 <- input$g2_num
-      updateSliderInput(session, "g2", value = input$g2_num)
-      invalidateLater(100)
-      later::later(function() { values$updating <- FALSE }, 0.15)
-    }
+    lastChanged$g2 <- "number"
+    updateSliderInput(session, "g2", value = input$g2_num)
   }, ignoreInit = TRUE)
   
   observeEvent(input$corr, {
-    if (!values$updating) {
-      values$updating <- TRUE
-      values$corr <- input$corr
-      updateNumericInput(session, "corr_num", value = input$corr)
-      invalidateLater(100)
-      later::later(function() { values$updating <- FALSE }, 0.15)
-    }
+    lastChanged$corr <- "slider"
+    updateNumericInput(session, "corr_num", value = input$corr)
   }, ignoreInit = TRUE)
   
   observeEvent(input$corr_num, {
-    if (!values$updating) {
-      values$updating <- TRUE
-      values$corr <- input$corr_num
-      updateSliderInput(session, "corr", value = input$corr_num)
-      invalidateLater(100)
-      later::later(function() { values$updating <- FALSE }, 0.15)
-    }
+    lastChanged$corr <- "number"
+    updateSliderInput(session, "corr", value = input$corr_num)
   }, ignoreInit = TRUE)
   
   observeEvent(input$defrate, {
-    if (!values$updating) {
-      values$updating <- TRUE
-      values$defrate <- input$defrate
-      updateNumericInput(session, "defrate_num", value = input$defrate)
-      invalidateLater(100)
-      later::later(function() { values$updating <- FALSE }, 0.15)
-    }
+    lastChanged$defrate <- "slider"
+    updateNumericInput(session, "defrate_num", value = input$defrate)
   }, ignoreInit = TRUE)
   
   observeEvent(input$defrate_num, {
-    if (!values$updating) {
-      values$updating <- TRUE
-      values$defrate <- input$defrate_num
-      updateSliderInput(session, "defrate", value = input$defrate_num)
-      invalidateLater(100)
-      later::later(function() { values$updating <- FALSE }, 0.15)
-    }
+    lastChanged$defrate <- "number"
+    updateSliderInput(session, "defrate", value = input$defrate_num)
   }, ignoreInit = TRUE)
   
   # Vector of values returned by the calculator function
@@ -318,11 +287,10 @@ server <- function(input, output, session) {
     )
     
     # Create data frame for optimal point
-    lower_gini <- min(g["gini1"], g["gini2"])
     gresdf <- data.frame(
       score_1_weight = g["score_1_weight"],
       new_gini = g["new_gini"],
-      ycorr = lower_gini + 0.75 * (g["new_gini"] - lower_gini)
+      y30 = as.numeric(gdf[which.min(abs(gdf$ws - g["score_2_weight"])), 2])
     )
     
     # Create the plot
@@ -337,30 +305,25 @@ server <- function(input, output, session) {
         plot.margin = margin(25, 25, 25, 25)
       ) +
       geom_line(data=gdf, aes(x=ws, y=corr1), color="steelblue", size=2) +
-      geom_point(data=data.frame(x=c(0, 1), y=c(g["gini2"], g["gini1"])),
-                 aes(x=x, y=y), color="steelblue", size=5) +
       geom_point(data=gresdf, aes(x=score_1_weight, y=new_gini), 
                  color="red", size=7) +
       geom_text_repel(data=gresdf, 
                       aes(x=score_1_weight, y=new_gini, 
                           label=round(new_gini, 3)),
                       color="red", fontface="bold", size=8,
-                      box.padding = 1.5,
-                      min.segment.length = 0) +
+                      box.padding = 1.5) +
       geom_label(data=gresdf, 
-                 aes(x=score_1_weight, y=ycorr, 
+                 aes(x=score_1_weight, y=y30, 
                      label=paste0("corr = ", corr)),
-                 size=6.5) +
-      geom_text_repel(data=data.frame(x=0, y=g["gini2"], 
+                 nudge_y = -0.01, size=6.5) +
+      geom_text_repel(data=data.frame(x=-0.05, y=g["gini2"], 
                                       la=paste0("Gini of scorecard 2 = ", round(g["gini2"], 3))),
                       aes(x=x, y=y, label=la), size=6.5,
-                      box.padding = 1.5,
-                      min.segment.length = 0) +
-      geom_text_repel(data=data.frame(x=1, y=g["gini1"], 
+                      box.padding = 1.5) +
+      geom_text_repel(data=data.frame(x=1.05, y=g["gini1"], 
                                       la=paste0("Gini of scorecard 1 = ", round(g["gini1"], 3))),
                       aes(x=x, y=y, label=la), size=6.5,
-                      box.padding = 1.5,
-                      min.segment.length = 0)
+                      box.padding = 1.5)
     
     print(p)
   })
@@ -370,49 +333,49 @@ server <- function(input, output, session) {
     valueBox("GINI of combined models", 
              tags$p(round(resultVector()[1], 4), style = 'font-size: 120%; font-weight: bold;'), 
              icon=icon("compress-arrows-alt"), 
-             color = "blue")
+             color = "light-blue")
   })
   
   output$box_weight1 <- renderInfoBox({
     infoBox("Scoring 1 weight", 
             round(resultVector()[3], 4), 
             icon=icon("balance-scale-left"), 
-            color = "light-blue")
+            color = "aqua")
   })
   
   output$box_weight2 <- renderInfoBox({
     infoBox("Scoring 2 weight", 
             round(resultVector()[4], 4), 
             icon=icon("balance-scale-right"), 
-            color = "light-blue")
+            color = "aqua")
   })
   
   output$box_new_rho <- renderValueBox({
     valueBox("New rho", 
              tags$p(round(resultVector()[7], 4), style = 'font-size: 120%; font-weight: bold;'), 
              icon=icon("chart-line"), 
-             color = "navy")
+             color = "olive")
   })
   
   output$box_rho1 <- renderInfoBox({
     infoBox("Rho 1", 
             round(resultVector()[5], 4), 
             icon=icon("chart-bar"), 
-            color = "blue")
+            color = "green")
   })
   
   output$box_rho2 <- renderInfoBox({
     infoBox("Rho 2", 
             round(resultVector()[6], 4), 
             icon=icon("chart-bar"), 
-            color = "blue")
+            color = "green")
   })
   
   output$box_a_opt <- renderValueBox({
     valueBox("A opt", 
              tags$p(round(resultVector()[2], 4), style = 'font-size: 120%; font-weight: bold;'), 
-             icon=icon("calculator"), 
-             color = "purple")
+             icon=icon("cloudscale"), 
+             color = "yellow")
   })
 }
 
