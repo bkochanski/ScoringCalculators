@@ -5,9 +5,7 @@ account: blakocha
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4531122
-bundleId: 4959746
+bundleId: 11275788
 url: https://blakocha.shinyapps.io/CombineScorecardsCalc/
-when: 1629838218.78506
-lastSyncTime: 1629838218.78506
 asMultiple: FALSE
 asStatic: FALSE

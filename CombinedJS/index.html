@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combined Scorecards Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/2.1.0/chartjs-plugin-annotation.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+        
+        .header {
+            background: #3c8dbc;
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: normal;
+        }
+        
+        .container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+        
+        .sidebar {
+            width: 350px;
+            background: #222d32;
+            color: #b8c7ce;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+        
+        .sidebar h2 {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        
+        .input-group {
+            margin-bottom: 30px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #b8c7ce;
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 14px;
+            -webkit-appearance: none;
+            background: #1a2226;
+            outline: none;
+            border-radius: 7px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 26px;
+            height: 26px;
+            background: #3c8dbc;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 26px;
+            height: 26px;
+            background: #3c8dbc;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+        
+        input[type="number"] {
+            width: 130px;
+            height: 48px;
+            font-size: 19px;
+            padding: 5px 10px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: #1a2226;
+            color: #b8c7ce;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            min-height: 700px;
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3c8dbc;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3c8dbc;
+        }
+        
+        #chartCanvas {
+            min-height: 600px !important;
+            height: 600px !important;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .result-box {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .result-box.large {
+            grid-column: 1 / -1;
+            padding: 15px 20px;
+        }
+        
+        .result-box.technical {
+            background: #f8f9fa;
+            padding: 8px 12px;
+        }
+        
+        .result-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+        
+        .result-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .result-value.large {
+            font-size: 24px;
+            color: #3c8dbc;
+        }
+        
+        .bg-blue { background: #3c8dbc; }
+        .bg-light-blue { background: #00c0ef; }
+        .bg-navy { background: #001f3f; }
+        .bg-purple { background: #605ca8; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Combined Scorecards Calculator</h1>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h2>Input Parameters</h2>
+            
+            <div class="input-group">
+                <label>GINI 1:</label>
+                <div class="input-row">
+                    <input type="range" id="g1Slider" min="0" max="1" step="0.01" value="0.4">
+                    <input type="number" id="g1Number" min="0" max="1" step="0.0001" value="0.4">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>GINI 2:</label>
+                <div class="input-row">
+                    <input type="range" id="g2Slider" min="0" max="1" step="0.01" value="0.3">
+                    <input type="number" id="g2Number" min="0" max="1" step="0.0001" value="0.3">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Correlation:</label>
+                <div class="input-row">
+                    <input type="range" id="corrSlider" min="0" max="1" step="0.01" value="0.15">
+                    <input type="number" id="corrNumber" min="0" max="1" step="0.0001" value="0.15">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Default rate:</label>
+                <div class="input-row">
+                    <input type="range" id="defrateSlider" min="0" max="1" step="0.01" value="0.1">
+                    <input type="number" id="defrateNumber" min="0" max="1" step="0.0001" value="0.1">
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="chart-container">
+                <div class="chart-title">GINI Combination Chart</div>
+                <canvas id="chartCanvas"></canvas>
+            </div>
+            
+            <div class="results-grid">
+                <div class="result-box large">
+                    <div class="result-label">GINI of combined models</div>
+                    <div class="result-value large" id="newGini">-</div>
+                </div>
+                
+                <div class="result-box">
+                    <div class="result-label">Scoring 1 weight</div>
+                    <div class="result-value" id="weight1">-</div>
+                </div>
+                
+                <div class="result-box">
+                    <div class="result-label">Scoring 2 weight</div>
+                    <div class="result-value" id="weight2">-</div>
+                </div>
+                
+                <div class="result-box technical">
+                    <div class="result-label">New rho</div>
+                    <div class="result-value" id="newRho">-</div>
+                </div>
+                
+                <div class="result-box technical">
+                    <div class="result-label">Rho 1</div>
+                    <div class="result-value" id="rho1">-</div>
+                </div>
+                
+                <div class="result-box technical">
+                    <div class="result-label">Rho 2</div>
+                    <div class="result-value" id="rho2">-</div>
+                </div>
+                
+                <div class="result-box technical">
+                    <div class="result-label">A opt</div>
+                    <div class="result-value" id="aOpt">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Normal distribution functions - improved accuracy
+        function erf(x) {
+            // Abramowitz and Stegun approximation with higher accuracy
+            const sign = x >= 0 ? 1 : -1;
+            x = Math.abs(x);
+            
+            const a1 = 0.254829592;
+            const a2 = -0.284496736;
+            const a3 = 1.421413741;
+            const a4 = -1.453152027;
+            const a5 = 1.061405429;
+            const p = 0.3275911;
+            
+            const t = 1.0 / (1.0 + p * x);
+            const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            
+            return sign * y;
+        }
+
+        function normCdf(x) {
+            return 0.5 * (1.0 + erf(x / Math.sqrt(2.0)));
+        }
+
+        function normInv(p) {
+            // More accurate inverse normal using rational approximation
+            if (p <= 0) return -Infinity;
+            if (p >= 1) return Infinity;
+            if (p === 0.5) return 0;
+            
+            const q = p < 0.5 ? p : 1 - p;
+            const t = Math.sqrt(-2.0 * Math.log(q));
+            
+            const c0 = 2.515517;
+            const c1 = 0.802853;
+            const c2 = 0.010328;
+            const d1 = 1.432788;
+            const d2 = 0.189269;
+            const d3 = 0.001308;
+            
+            const x = t - ((c2 * t + c1) * t + c0) / (((d3 * t + d2) * t + d1) * t + 1.0);
+            
+            return p < 0.5 ? -x : x;
+        }
+
+        // GINI calculation functions
+        function ginic(bc, gc) {
+            let sum = 0;
+            for (let i = 1; i < gc.length; i++) {
+                sum += (gc[i] - gc[i-1]) * (bc[i] + bc[i-1]);
+            }
+            return sum - 1;
+        }
+
+        function giniCrd(rho, defrate, gran = 10000) {
+            const qnormDefrate = normInv(defrate);
+            const sqrtRho = Math.sqrt(1.0 - rho * rho);
+            
+            const drates_i = [];
+            for (let i = 1; i < gran; i++) {
+                const z = normInv(i / gran);
+                const val = normCdf((qnormDefrate - rho * z) / sqrtRho);
+                drates_i.push(val);
+            }
+            
+            const drates_2i = [];
+            drates_2i.push(1);
+            for (let i = 0; i < drates_i.length - 1; i++) {
+                drates_2i.push((drates_i[i] + drates_i[i + 1]) / 2.0);
+            }
+            drates_2i.push((drates_i[drates_i.length - 1] + 0) / 2.0);
+            drates_2i.push(0);
+            
+            let sumDrates = 0;
+            let sumInvDrates = 0;
+            for (let i = 0; i < drates_2i.length; i++) {
+                sumDrates += drates_2i[i];
+                sumInvDrates += (1.0 - drates_2i[i]);
+            }
+            
+            const bc = [];
+            const gc = [];
+            let cumB = 0, cumG = 0;
+            
+            for (let i = 0; i < drates_2i.length; i++) {
+                cumB += drates_2i[i] / sumDrates;
+                cumG += (1.0 - drates_2i[i]) / sumInvDrates;
+                bc.push(cumB);
+                gc.push(cumG);
+            }
+            
+            return ginic(bc, gc);
+        }
+
+        function findRho(targetGini, defrate) {
+            let lower = 0.0;
+            let upper = 1.0;
+            const tolerance = 1e-12;
+            const maxIterations = 200;
+            
+            for (let i = 0; i < maxIterations; i++) {
+                const mid = (lower + upper) / 2.0;
+                const gini = giniCrd(mid, defrate, 100000);
+                
+                if (Math.abs(gini - targetGini) < tolerance) return mid;
+                
+                if (gini < targetGini) {
+                    lower = mid;
+                } else {
+                    upper = mid;
+                }
+            }
+            
+            return (lower + upper) / 2.0;
+        }
+
+        function giniCombineCalculator(g1, g2, corr, defrate) {
+            const rho1 = findRho(g1, defrate);
+            const rho2 = findRho(g2, defrate);
+            
+            const denominator = (corr * rho1 - rho2);
+            
+            // Check if calculation is valid
+            if (Math.abs(denominator) < 1e-10) {
+                return {
+                    newGini: NaN,
+                    aOpt: NaN,
+                    weight1: NaN,
+                    weight2: NaN,
+                    rho1: rho1,
+                    rho2: rho2,
+                    newCorr: NaN,
+                    gini1: g1,
+                    gini2: g2,
+                    error: "Invalid combination: correlation too close to rho2/rho1 ratio"
+                };
+            }
+            
+            const aOpt = (corr * rho2 - rho1) / denominator;
+            
+            // Check if aOpt is in valid range
+            if (aOpt < 0 || aOpt > 1000 || !isFinite(aOpt)) {
+                return {
+                    newGini: NaN,
+                    aOpt: aOpt,
+                    weight1: NaN,
+                    weight2: NaN,
+                    rho1: rho1,
+                    rho2: rho2,
+                    newCorr: NaN,
+                    gini1: g1,
+                    gini2: g2,
+                    error: "Invalid a_opt value (out of range)"
+                };
+            }
+            
+            const corrOpt = (aOpt * rho1 + rho2) / Math.sqrt(aOpt * aOpt + 2 * aOpt * corr + 1);
+            const gResult = giniCrd(corrOpt, defrate, 100000);
+            
+            return {
+                newGini: gResult,
+                aOpt: aOpt,
+                weight1: aOpt / (1 + aOpt),
+                weight2: 1 / (1 + aOpt),
+                rho1: rho1,
+                rho2: rho2,
+                newCorr: corrOpt,
+                gini1: g1,
+                gini2: g2,
+                error: null
+            };
+        }
+
+        // Chart setup
+        let chart;
+        let updateTimeout;
+
+        function initChart() {
+            const ctx = document.getElementById('chartCanvas').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Combined GINI',
+                        data: [],
+                        borderColor: '#4682b4',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.4
+                    }, {
+                        label: 'corr = 0.1',
+                        data: [],
+                        borderColor: '#90CAF9',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0.4
+                    }, {
+                        label: 'corr = 0.4',
+                        data: [],
+                        borderColor: '#64B5F6',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0.4
+                    }, {
+                        label: 'corr = 0.8',
+                        data: [],
+                        borderColor: '#42A5F5',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0.4
+                    }, {
+                        label: 'Individual Scorecards',
+                        data: [],
+                        backgroundColor: '#4682b4',
+                        borderColor: '#4682b4',
+                        pointRadius: 6,
+                        showLine: false
+                    }, {
+                        label: 'Optimal Point',
+                        data: [],
+                        backgroundColor: '#ff4444',
+                        borderColor: '#ff4444',
+                        pointRadius: 8,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 50,
+                            right: 100,
+                            bottom: 60,
+                            left: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Weight: ${context.parsed.x.toFixed(3)}, GINI: ${context.parsed.y.toFixed(4)}`;
+                                }
+                            }
+                        },
+                        annotation: {
+                            annotations: {}
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: 0,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Normalized weight of scorecard 1',
+                                font: { size: 16, weight: 'bold' }
+                            },
+                            ticks: {
+                                font: { size: 14 }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Gini of the combined scorecard',
+                                font: { size: 16, weight: 'bold' }
+                            },
+                            ticks: {
+                                font: { size: 14 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCalculation() {
+            const g1 = parseFloat(document.getElementById('g1Number').value);
+            const g2 = parseFloat(document.getElementById('g2Number').value);
+            const corr = parseFloat(document.getElementById('corrNumber').value);
+            const defrate = parseFloat(document.getElementById('defrateNumber').value);
+            
+            const result = giniCombineCalculator(g1, g2, corr, defrate);
+            
+            // Update result boxes
+            if (result.error) {
+                document.getElementById('newGini').textContent = 'N/A';
+                document.getElementById('newGini').title = result.error;
+                document.getElementById('weight1').textContent = 'N/A';
+                document.getElementById('weight2').textContent = 'N/A';
+                document.getElementById('newRho').textContent = 'N/A';
+            } else {
+                document.getElementById('newGini').textContent = result.newGini.toFixed(4);
+                document.getElementById('newGini').title = '';
+                document.getElementById('weight1').textContent = result.weight1.toFixed(4);
+                document.getElementById('weight2').textContent = result.weight2.toFixed(4);
+                document.getElementById('newRho').textContent = result.newCorr.toFixed(4);
+            }
+            
+            document.getElementById('rho1').textContent = result.rho1.toFixed(4);
+            document.getElementById('rho2').textContent = result.rho2.toFixed(4);
+            document.getElementById('aOpt').textContent = isFinite(result.aOpt) ? result.aOpt.toFixed(4) : 'N/A';
+            
+            // Generate curve data for current correlation
+            const curveData = [];
+            for (let i = 1; i < 200; i++) {
+                const w = i / 200;
+                const a = w / (1 - w);
+                const rhoCombined = (a * result.rho1 + result.rho2) / Math.sqrt(a * a + 2 * a * corr + 1);
+                const gini = giniCrd(rhoCombined, defrate, 10000);
+                curveData.push({ x: w, y: gini });
+            }
+            
+            // Generate curve data for alternative correlations (0.1, 0.4, 0.8)
+            const altCorrelations = [0.1, 0.4, 0.8];
+            const altCurveData = altCorrelations.map(altCorr => {
+                const data = [];
+                for (let i = 1; i < 200; i++) {
+                    const w = i / 200;
+                    const a = w / (1 - w);
+                    const rhoCombined = (a * result.rho1 + result.rho2) / Math.sqrt(a * a + 2 * a * altCorr + 1);
+                    const gini = giniCrd(rhoCombined, defrate, 10000);
+                    data.push({ x: w, y: gini });
+                }
+                return data;
+            });
+            
+            // Update chart
+            chart.data.datasets[0].data = curveData;
+            chart.data.datasets[1].data = altCurveData[0]; // corr = 0.1
+            chart.data.datasets[2].data = altCurveData[1]; // corr = 0.4
+            chart.data.datasets[3].data = altCurveData[2]; // corr = 0.8
+            chart.data.datasets[4].data = [
+                { x: 0, y: result.gini2 },
+                { x: 1, y: result.gini1 }
+            ];
+            
+            if (!result.error && isFinite(result.newGini)) {
+                chart.data.datasets[5].data = [
+                    { x: result.weight1, y: result.newGini }
+                ];
+                
+                // Calculate label positions for alternative correlations
+                const lowerGini = Math.min(result.gini1, result.gini2);
+                const labelY = lowerGini + 0.5 * (result.newGini - lowerGini);
+                const labelX = result.weight1 >= 0.5 ? 0.3 : 0.7; // Left if optimal is right, right if optimal is left
+                
+                // Calculate the GINI values at labelX for each correlation
+                const getLabelGini = (corrVal) => {
+                    const w = labelX;
+                    const a = w / (1 - w);
+                    const rhoCombined = (a * result.rho1 + result.rho2) / Math.sqrt(a * a + 2 * a * corrVal + 1);
+                    return giniCrd(rhoCombined, defrate, 10000);
+                };
+                
+                const gini01 = getLabelGini(0.1);
+                const gini04 = getLabelGini(0.4);
+                const gini08 = getLabelGini(0.8);
+                
+                // Update annotations for labels
+                chart.options.plugins.annotation.annotations = {
+                    optimalLabel: {
+                        type: 'label',
+                        xValue: result.weight1,
+                        yValue: result.newGini,
+                        content: result.newGini.toFixed(3),
+                        color: 'white',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        backgroundColor: '#ff4444',
+                        borderWidth: 0,
+                        borderRadius: 6,
+                        padding: 8,
+                        yAdjust: 35
+                    },
+                    corrLabel: {
+                        type: 'label',
+                        xValue: result.weight1,
+                        yValue: result.newGini,
+                        content: `corr = ${corr.toFixed(2)}`,
+                        color: '#333',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        borderColor: '#ccc',
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        padding: 6,
+                        yAdjust: 65
+                    },
+                    corr01Label: {
+                        type: 'label',
+                        xValue: labelX,
+                        yValue: gini01,
+                        content: '0.1',
+                        color: '#90CAF9',
+                        font: {
+                            size: 11,
+                            weight: 'bold'
+                        },
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        borderColor: '#90CAF9',
+                        borderWidth: 1,
+                        borderRadius: 3,
+                        padding: 4
+                    },
+                    corr04Label: {
+                        type: 'label',
+                        xValue: labelX,
+                        yValue: gini04,
+                        content: '0.4',
+                        color: '#64B5F6',
+                        font: {
+                            size: 11,
+                            weight: 'bold'
+                        },
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        borderColor: '#64B5F6',
+                        borderWidth: 1,
+                        borderRadius: 3,
+                        padding: 4
+                    },
+                    corr08Label: {
+                        type: 'label',
+                        xValue: labelX,
+                        yValue: gini08,
+                        content: '0.8',
+                        color: '#42A5F5',
+                        font: {
+                            size: 11,
+                            weight: 'bold'
+                        },
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        borderColor: '#42A5F5',
+                        borderWidth: 1,
+                        borderRadius: 3,
+                        padding: 4
+                    },
+                    gini2Point: {
+                        type: 'point',
+                        xValue: 0,
+                        yValue: result.gini2,
+                        backgroundColor: '#4682b4',
+                        borderColor: 'white',
+                        borderWidth: 2,
+                        radius: 8
+                    },
+                    gini1Point: {
+                        type: 'point',
+                        xValue: 1,
+                        yValue: result.gini1,
+                        backgroundColor: '#4682b4',
+                        borderColor: 'white',
+                        borderWidth: 2,
+                        radius: 8
+                    },
+                    gini2Label: {
+                        type: 'label',
+                        xValue: 0,
+                        yValue: result.gini2,
+                        content: `G2=${result.gini2.toFixed(2)}`,
+                        color: 'white',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        backgroundColor: '#4682b4',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        padding: 6,
+                        xAdjust: 60,
+                        yAdjust: -25
+                    },
+                    gini1Label: {
+                        type: 'label',
+                        xValue: 1,
+                        yValue: result.gini1,
+                        content: `G1=${result.gini1.toFixed(2)}`,
+                        color: 'white',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        backgroundColor: '#4682b4',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        padding: 6,
+                        xAdjust: -60,
+                        yAdjust: -25
+                    }
+                };
+            } else {
+                // No optimal point for invalid combinations
+                chart.data.datasets[5].data = [];
+                chart.options.plugins.annotation.annotations = {
+                    gini2Point: {
+                        type: 'point',
+                        xValue: 0,
+                        yValue: result.gini2,
+                        backgroundColor: '#4682b4',
+                        borderColor: 'white',
+                        borderWidth: 2,
+                        radius: 8
+                    },
+                    gini1Point: {
+                        type: 'point',
+                        xValue: 1,
+                        yValue: result.gini1,
+                        backgroundColor: '#4682b4',
+                        borderColor: 'white',
+                        borderWidth: 2,
+                        radius: 8
+                    },
+                    gini2Label: {
+                        type: 'label',
+                        xValue: 0,
+                        yValue: result.gini2,
+                        content: `G2=${result.gini2.toFixed(2)}`,
+                        color: 'white',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        backgroundColor: '#4682b4',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        padding: 6,
+                        xAdjust: 60,
+                        yAdjust: -25
+                    },
+                    gini1Label: {
+                        type: 'label',
+                        xValue: 1,
+                        yValue: result.gini1,
+                        content: `G1=${result.gini1.toFixed(2)}`,
+                        color: 'white',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        backgroundColor: '#4682b4',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        padding: 6,
+                        xAdjust: -60,
+                        yAdjust: -25
+                    },
+                    errorLabel: {
+                        type: 'label',
+                        xValue: 0.5,
+                        yValue: result.gini1 + 0.05,
+                        content: 'No valid solution',
+                        color: '#cc0000',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        backgroundColor: 'rgba(255, 240, 240, 0.95)',
+                        borderColor: '#cc0000',
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        padding: 8,
+                        yAdjust: 30
+                    }
+                };
+            }
+            
+            chart.update();
+        }
+
+        // Sync slider and number inputs
+        function syncInputs(sliderId, numberId) {
+            const slider = document.getElementById(sliderId);
+            const number = document.getElementById(numberId);
+            
+            slider.addEventListener('input', (e) => {
+                number.value = e.target.value;
+                clearTimeout(updateTimeout);
+                updateTimeout = setTimeout(updateCalculation, 200);
+            });
+            
+            number.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && val >= 0 && val <= 1) {
+                    slider.value = val;
+                    clearTimeout(updateTimeout);
+                    updateTimeout = setTimeout(updateCalculation, 200);
+                }
+            });
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            initChart();
+            syncInputs('g1Slider', 'g1Number');
+            syncInputs('g2Slider', 'g2Number');
+            syncInputs('corrSlider', 'corrNumber');
+            syncInputs('defrateSlider', 'defrateNumber');
+            updateCalculation();
+        });
+    </script>
+</body>
+</html>

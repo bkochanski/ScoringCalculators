@@ -181,10 +181,9 @@ gini_combine_calculator <- function(g1, g2, corr, defaultrate){
            gini2=g2))
 }
 
-
 # Define server logic
 server <- function(input, output, session) {
-  # Track which input was last changed
+  # Reactive values to store the actual values to use
   values <- reactiveValues(
     g1 = 0.4,
     g2 = 0.3,
@@ -312,33 +311,19 @@ server <- function(input, output, session) {
     }
     gini_from_aop <- Vectorize(gini_from_aop)
     
-    # Create data frame for the main curve
+    # Create data frame for the curve
     gdf <- data.frame(
       ws = ws, 
-      corr_current = gini_from_aop(w2a(ws), corr_val = corr)
+      corr1 = gini_from_aop(w2a(ws), corr_val = corr)
     )
-    
-    # Create data frames for alternative correlations (0.1, 0.4, 0.8)
-    gdf_01 <- data.frame(ws = ws, gini = gini_from_aop(w2a(ws), corr_val = 0.1))
-    gdf_04 <- data.frame(ws = ws, gini = gini_from_aop(w2a(ws), corr_val = 0.4))
-    gdf_08 <- data.frame(ws = ws, gini = gini_from_aop(w2a(ws), corr_val = 0.8))
     
     # Create data frame for optimal point
     lower_gini <- min(g["gini1"], g["gini2"])
     gresdf <- data.frame(
       score_1_weight = g["score_1_weight"],
-      new_gini = g["new_gini"]
+      new_gini = g["new_gini"],
+      ycorr = lower_gini + 0.75 * (g["new_gini"] - lower_gini)
     )
-    
-    # Calculate label position
-    label_x <- ifelse(g["score_1_weight"] >= 0.5, 0.3, 0.7)
-    label_a <- label_x / (1 - label_x)
-    
-    # Calculate y positions for correlation labels
-    gini_current_at_label <- gini_from_aop(label_a, corr)
-    gini_01_at_label <- gini_from_aop(label_a, 0.1)
-    gini_04_at_label <- gini_from_aop(label_a, 0.4)
-    gini_08_at_label <- gini_from_aop(label_a, 0.8)
     
     # Create the plot
     p <- ggplot() + 
@@ -351,95 +336,60 @@ server <- function(input, output, session) {
         axis.text = element_text(size = 18),
         plot.margin = margin(25, 25, 25, 25)
       ) +
-      # Dotted reference lines
-      geom_line(data=gdf_01, aes(x=ws, y=gini), color="#90CAF9", size=1.5, linetype="dotted") +
-      geom_line(data=gdf_04, aes(x=ws, y=gini), color="#64B5F6", size=1.5, linetype="dotted") +
-      geom_line(data=gdf_08, aes(x=ws, y=gini), color="#42A5F5", size=1.5, linetype="dotted") +
-      # Main curve
-      geom_line(data=gdf, aes(x=ws, y=corr_current), color="steelblue", size=2) +
-      # Endpoint points
+      geom_line(data=gdf, aes(x=ws, y=corr1), color="steelblue", size=2) +
       geom_point(data=data.frame(x=c(0, 1), y=c(g["gini2"], g["gini1"])),
-                 aes(x=x, y=y), color="steelblue", size=7) +
-      # Optimal point
+                 aes(x=x, y=y), color="steelblue", size=5) +
       geom_point(data=gresdf, aes(x=score_1_weight, y=new_gini), 
-                 color="red", size=9)
-    
-    # Add labels only if result is valid
-    if (!is.na(g["new_gini"]) && is.finite(g["new_gini"])) {
-      # Add correlation reference labels
-      p <- p +
-        annotate("label", x=label_x, y=gini_01_at_label, label="0.1", 
-                 color="#90CAF9", fill="white", size=4, fontface="bold",
-                 label.padding=unit(0.15, "lines")) +
-        annotate("label", x=label_x, y=gini_04_at_label, label="0.4",
-                 color="#64B5F6", fill="white", size=4, fontface="bold",
-                 label.padding=unit(0.15, "lines")) +
-        annotate("label", x=label_x, y=gini_08_at_label, label="0.8",
-                 color="#42A5F5", fill="white", size=4, fontface="bold",
-                 label.padding=unit(0.15, "lines")) +
-        # Current correlation label
-        annotate("label", x=label_x, y=gini_current_at_label, 
-                 label=paste0("corr = ", round(corr, 2)),
-                 color="steelblue", fill="white", size=5, fontface="bold",
-                 label.padding=unit(0.2, "lines"), label.size=0.5) +
-        # Optimal value label - BELOW THE RED POINT
-        annotate("label", x=g["score_1_weight"], y=g["new_gini"], 
-                 label=round(g["new_gini"], 3),
-                 color="white", fill="red", size=7, fontface="bold",
-                 label.padding=unit(0.25, "lines"), vjust=1.8)
-    } else {
-      # Error message for invalid combinations
-      p <- p + 
-        annotate("label", x=0.5, y=g["gini1"] + 0.05,
-                 label="No valid solution", color="red", fill="#fff0f0",
-                 size=5, fontface="bold", label.size=1)
-    }
-    
-    # Add G1 and G2 labels
-    p <- p +
-      annotate("label", x=0, y=g["gini2"], label=paste0("G2=", round(g["gini2"], 2)),
-               color="white", fill="steelblue", size=5, fontface="bold",
-               hjust=-0.5, vjust=1.5, label.padding=unit(0.2, "lines")) +
-      annotate("label", x=1, y=g["gini1"], label=paste0("G1=", round(g["gini1"], 2)),
-               color="white", fill="steelblue", size=5, fontface="bold",
-               hjust=1.5, vjust=1.5, label.padding=unit(0.2, "lines"))
+                 color="red", size=7) +
+      geom_text_repel(data=gresdf, 
+                      aes(x=score_1_weight, y=new_gini, 
+                          label=round(new_gini, 3)),
+                      color="red", fontface="bold", size=8,
+                      box.padding = 1.5,
+                      min.segment.length = 0) +
+      geom_label(data=gresdf, 
+                 aes(x=score_1_weight, y=ycorr, 
+                     label=paste0("corr = ", corr)),
+                 size=6.5) +
+      geom_text_repel(data=data.frame(x=0, y=g["gini2"], 
+                                      la=paste0("Gini of scorecard 2 = ", round(g["gini2"], 3))),
+                      aes(x=x, y=y, label=la), size=6.5,
+                      box.padding = 1.5,
+                      min.segment.length = 0) +
+      geom_text_repel(data=data.frame(x=1, y=g["gini1"], 
+                                      la=paste0("Gini of scorecard 1 = ", round(g["gini1"], 3))),
+                      aes(x=x, y=y, label=la), size=6.5,
+                      box.padding = 1.5,
+                      min.segment.length = 0)
     
     print(p)
   })
   
   # BOXES
   output$box_new_gini <- renderValueBox({
-    val <- resultVector()[1]
-    display_val <- if(is.na(val) || !is.finite(val)) "N/A" else round(val, 4)
     valueBox("GINI of combined models", 
-             tags$p(display_val, style = 'font-size: 120%; font-weight: bold;'), 
+             tags$p(round(resultVector()[1], 4), style = 'font-size: 120%; font-weight: bold;'), 
              icon=icon("compress-arrows-alt"), 
              color = "blue")
   })
   
   output$box_weight1 <- renderInfoBox({
-    val <- resultVector()[3]
-    display_val <- if(is.na(val) || !is.finite(val)) "N/A" else round(val, 4)
     infoBox("Scoring 1 weight", 
-            display_val, 
+            round(resultVector()[3], 4), 
             icon=icon("balance-scale-left"), 
             color = "light-blue")
   })
   
   output$box_weight2 <- renderInfoBox({
-    val <- resultVector()[4]
-    display_val <- if(is.na(val) || !is.finite(val)) "N/A" else round(val, 4)
     infoBox("Scoring 2 weight", 
-            display_val, 
+            round(resultVector()[4], 4), 
             icon=icon("balance-scale-right"), 
             color = "light-blue")
   })
   
   output$box_new_rho <- renderValueBox({
-    val <- resultVector()[7]
-    display_val <- if(is.na(val) || !is.finite(val)) "N/A" else round(val, 4)
     valueBox("New rho", 
-             tags$p(display_val, style = 'font-size: 120%; font-weight: bold;'), 
+             tags$p(round(resultVector()[7], 4), style = 'font-size: 120%; font-weight: bold;'), 
              icon=icon("chart-line"), 
              color = "navy")
   })
@@ -459,10 +409,8 @@ server <- function(input, output, session) {
   })
   
   output$box_a_opt <- renderValueBox({
-    val <- resultVector()[2]
-    display_val <- if(is.na(val) || !is.finite(val)) "N/A" else round(val, 4)
     valueBox("A opt", 
-             tags$p(display_val, style = 'font-size: 120%; font-weight: bold;'), 
+             tags$p(round(resultVector()[2], 4), style = 'font-size: 120%; font-weight: bold;'), 
              icon=icon("calculator"), 
              color = "purple")
   })

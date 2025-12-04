@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wizualizacja błądzenia losowego</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f9fafb;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            margin: 20px 0;
+            background: white;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        .btn-play {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-play:hover:not(:disabled) {
+            background-color: #2563eb;
+        }
+        .btn-reset {
+            background-color: #6b7280;
+            color: white;
+        }
+        .btn-reset:hover {
+            background-color: #4b5563;
+        }
+        button:disabled {
+            background-color: #d1d5db;
+            cursor: not-allowed;
+        }
+        .info {
+            color: #4b5563;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        .description {
+            max-width: 600px;
+            margin: 10px auto;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Wizualizacja błądzenia losowego</h2>
+        
+        <canvas id="canvas" width="800" height="400"></canvas>
+        
+        <div class="controls">
+            <button id="playBtn" class="btn-play">
+                <span id="playIcon">▶</span>
+                <span id="playText">Start</span>
+            </button>
+            <button id="resetBtn" class="btn-reset">
+                <span>↻</span>
+                <span>Reset</span>
+            </button>
+        </div>
+        
+        <div class="info">
+            <p>Krok: <span id="stepCounter">0</span> / <span id="maxSteps">50</span></p>
+            <p class="description">
+                Czerwona krzywa pokazuje rozkład normalny N(0, 0.3²), z którego losowana jest zmiana wartości. 
+                Niebieski przerywany odcinek pokazuje proces losowania kolejnego punktu.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        var playBtn = document.getElementById('playBtn');
+        var resetBtn = document.getElementById('resetBtn');
+        var stepCounter = document.getElementById('stepCounter');
+        var playIcon = document.getElementById('playIcon');
+        var playText = document.getElementById('playText');
+
+        var width = 800;
+        var height = 400;
+        var padding = 50;
+        var maxSteps = 50;
+        var stepDelay = 800;
+        var densityDisplayTime = 400;
+        var samplingDuration = 600;
+        var samplingIntervalTime = 50;
+        var stdDev = 0.3;
+
+        var points = [{x: 0, y: 1}];
+        var currentStep = 0;
+        var isPlaying = false;
+        var showDensity = false;
+        var samplingPoint = null;
+        var animationTimeout = null;
+        var samplingIntervalId = null;
+
+        function normalRandom(mean, stdDev) {
+            mean = mean || 0;
+            stdDev = stdDev || 0.3;
+            var u1 = Math.random();
+            var u2 = Math.random();
+            var z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+            return mean + z0 * stdDev;
+        }
+
+        function normalPDF(x, mean, stdDev) {
+            mean = mean || 0;
+            stdDev = stdDev || 0.3;
+            return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * 
+                   Math.exp(-0.5 * Math.pow((x - mean) / stdDev, 2));
+        }
+
+        function drawVisualization() {
+            ctx.clearRect(0, 0, width, height);
+
+            var xScale = (width - 2 * padding) / maxSteps;
+            var yScale = height - 2 * padding;
+            var yCenter = height / 2;
+
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            
+            ctx.beginPath();
+            ctx.moveTo(padding, yCenter);
+            ctx.lineTo(width - padding, yCenter);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.stroke();
+
+            ctx.fillStyle = '#666';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('Czas', width - padding - 30, yCenter + 20);
+            ctx.save();
+            ctx.translate(20, yCenter);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Wartość', 0, 0);
+            ctx.restore();
+
+            if (showDensity && points.length > 0) {
+                var lastPoint = points[points.length - 1];
+                var xPos = padding + lastPoint.x * xScale;
+                var lastYPos = yCenter - (lastPoint.y - 1) * yScale * 0.3;
+                
+                ctx.strokeStyle = 'rgba(255, 100, 100, 0.6)';
+                ctx.fillStyle = 'rgba(255, 100, 100, 0.1)';
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                var densityPoints = [];
+                for (var dy = -2; dy <= 2; dy += 0.05) {
+                    var density = normalPDF(dy, 0, stdDev);
+                    var scaledDensity = density * 100;
+                    var yPos = lastYPos - dy * yScale * 0.3;
+                    densityPoints.push({x: xPos + scaledDensity, y: yPos});
+                }
+                
+                ctx.moveTo(xPos, densityPoints[0].y);
+                for (var i = 0; i < densityPoints.length; i++) {
+                    ctx.lineTo(densityPoints[i].x, densityPoints[i].y);
+                }
+                ctx.lineTo(xPos, densityPoints[densityPoints.length - 1].y);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            if (points.length > 1) {
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(
+                    padding + points[0].x * xScale,
+                    yCenter - (points[0].y - 1) * yScale * 0.3
+                );
+                
+                for (var i = 1; i < points.length; i++) {
+                    ctx.lineTo(
+                        padding + points[i].x * xScale,
+                        yCenter - (points[i].y - 1) * yScale * 0.3
+                    );
+                }
+                ctx.stroke();
+            }
+
+            for (var i = 0; i < points.length; i++) {
+                var point = points[i];
+                var xPos = padding + point.x * xScale;
+                var yPos = yCenter - (point.y - 1) * yScale * 0.3;
+                
+                ctx.fillStyle = i === points.length - 1 ? '#ef4444' : '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(xPos, yPos, i === points.length - 1 ? 6 : 4, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
+            if (samplingPoint !== null && points.length > 0) {
+                var lastPoint = points[points.length - 1];
+                var xPos = padding + lastPoint.x * xScale;
+                var lastYPos = yCenter - (lastPoint.y - 1) * yScale * 0.3;
+                var sampleXPos = padding + (lastPoint.x + 1) * xScale;
+                var sampleYPos = yCenter - (samplingPoint - 1) * yScale * 0.3;
+                
+                ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(xPos, lastYPos);
+                ctx.lineTo(sampleXPos, sampleYPos);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.6)';
+                ctx.beginPath();
+                ctx.arc(sampleXPos, sampleYPos, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        function updateUI() {
+            stepCounter.textContent = currentStep;
+            playBtn.disabled = currentStep >= maxSteps && !isPlaying;
+            
+            if (isPlaying) {
+                playIcon.textContent = '⏸';
+                playText.textContent = 'Pauza';
+            } else {
+                playIcon.textContent = '▶';
+                playText.textContent = 'Start';
+            }
+        }
+
+        function reset() {
+            isPlaying = false;
+            points = [{x: 0, y: 1}];
+            currentStep = 0;
+            showDensity = false;
+            samplingPoint = null;
+            
+            if (animationTimeout) clearTimeout(animationTimeout);
+            if (samplingIntervalId) clearInterval(samplingIntervalId);
+            
+            updateUI();
+            drawVisualization();
+        }
+
+        function step() {
+            if (currentStep >= maxSteps) {
+                isPlaying = false;
+                updateUI();
+                return;
+            }
+
+            showDensity = true;
+            drawVisualization();
+            
+            var lastPoint = points[points.length - 1];
+            var samplingCount = 0;
+            var maxSamplings = samplingDuration / samplingIntervalTime;
+            
+            samplingIntervalId = setInterval(function() {
+                var randomChange = normalRandom();
+                samplingPoint = lastPoint.y + randomChange;
+                drawVisualization();
+                samplingCount++;
+                
+                if (samplingCount >= maxSamplings) {
+                    clearInterval(samplingIntervalId);
+                }
+            }, samplingIntervalTime);
+            
+            animationTimeout = setTimeout(function() {
+                var change = normalRandom();
+                var newPoint = {
+                    x: currentStep + 1,
+                    y: lastPoint.y + change
+                };
+                
+                points.push(newPoint);
+                showDensity = false;
+                samplingPoint = null;
+                currentStep++;
+                
+                updateUI();
+                drawVisualization();
+                
+                if (isPlaying && currentStep < maxSteps) {
+                    step();
+                } else {
+                    isPlaying = false;
+                    updateUI();
+                }
+            }, densityDisplayTime + samplingDuration + stepDelay);
+        }
+
+        playBtn.addEventListener('click', function() {
+            isPlaying = !isPlaying;
+            updateUI();
+            
+            if (isPlaying) {
+                step();
+            } else {
+                if (animationTimeout) clearTimeout(animationTimeout);
+                if (samplingIntervalId) clearInterval(samplingIntervalId);
+                showDensity = false;
+                samplingPoint = null;
+                drawVisualization();
+            }
+        });
+
+        resetBtn.addEventListener('click', reset);
+
+        reset();
+    </script>
+</body>
+</html>
